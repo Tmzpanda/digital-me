@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://tianmingzhang.com"),
-  title: "Chat with Tim | Digital Me",
+  metadataBase: new URL("https://timzhang.me"),
+  title: "Chat with Tim",
   description:
     "Chat with Tim's AI to learn about his experience as a Data Engineer at Meta, his GCP certifications, and data engineering projects.",
   icons: {
@@ -22,10 +22,10 @@ export const metadata: Metadata = {
     apple: "/favicon.jpg",
   },
   openGraph: {
-    title: "Chat with Tim | Digital Me",
+    title: "Chat with Tim",
     description:
       "I built an AI version of myself. Ask it anything about my experience, skills, or projects!",
-    url: "https://tianmingzhang.com",
+    url: "https://timzhang.me",
     siteName: "Digital Tim",
     images: [
       {
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "Chat with Tim | Digital Me",
+    title: "Chat with Tim",
     description:
       "I built an AI version of myself. Ask it anything about my experience, skills, or projects!",
     images: ["/images/profile.jpg"],
