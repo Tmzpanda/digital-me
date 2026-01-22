@@ -2,6 +2,7 @@
 
 import { SidebarChat } from "@/components/chat/SidebarChat";
 import Image from "next/image";
+import Link from "next/link";
 
 // ============================================
 // CUSTOMIZE YOUR INFO HERE
@@ -52,10 +53,9 @@ const actionLinks = [
   },
 ];
 
-export default function Home() {
+export default function WorkPage() {
   return (
     <div className="min-h-screen bg-background relative flex items-center justify-center p-4 lg:p-8">
-
       <div className="w-full max-w-5xl mx-auto relative">
         <div className="grid lg:grid-cols-[320px_1fr] gap-8 lg:gap-16 items-center">
 
