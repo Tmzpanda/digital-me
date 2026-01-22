@@ -28,7 +28,11 @@
       "Bash(brew install:*)",
       "Bash(vercel:*)",
       "Bash(dig:*)",
-      "WebFetch(domain:timzhang.me)"
+      "WebFetch(domain:timzhang.me)",
+      "Bash(npm uninstall:*)",
+      "Bash(tree:*)",
+      "Bash(kill:*)",
+      "Bash(git rm:*)"
     ]
   }
 }
