@@ -2,7 +2,7 @@ import { LandingHero } from "@/components/landing/LandingHero";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "天色渐明",
+  title: "Tianming Zhang",
 };
 
 export default function Home() {
