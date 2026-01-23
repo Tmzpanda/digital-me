@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { BlogPostMeta, BlogCategory, categoryLabels } from "@/lib/blog-types";
 
-const categories = [
+const categories: { id: BlogCategory | "all"; label: string }[] = [
   { id: "all", label: "All" },
   { id: "tech", label: "科技" },
   { id: "investment", label: "投资" },
@@ -12,7 +13,24 @@ const categories = [
 ];
 
 export default function BlogPage() {
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [activeCategory, setActiveCategory] = useState<BlogCategory | "all">("all");
+  const [posts, setPosts] = useState<BlogPostMeta[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/blog")
+      .then((res) => res.json())
+      .then((data) => {
+        setPosts(data.posts || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const filteredPosts =
+    activeCategory === "all"
+      ? posts
+      : posts.filter((post) => post.category === activeCategory);
 
   return (
     <div className="min-h-screen bg-background">
@@ -29,7 +47,7 @@ export default function BlogPage() {
               </svg>
             </Link>
             <div className="flex items-center gap-1">
-            {categories.map((category) => (
+              {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => setActiveCategory(category.id)}
@@ -49,17 +67,46 @@ export default function BlogPage() {
       </nav>
 
       {/* Content */}
-      <div className="max-w-3xl mx-auto px-4 py-16">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-foreground mb-4">Blog</h1>
-          <p className="text-muted-foreground mb-8">
-            Exploring tech, markets, and the forces that shape our world.
-          </p>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-muted-foreground text-sm">
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            Coming soon
+      <div className="max-w-3xl mx-auto px-4 py-12">
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block w-6 h-6 border-2 border-muted-foreground/30 border-t-foreground rounded-full animate-spin" />
           </div>
-        </div>
+        ) : filteredPosts.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No articles yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {filteredPosts.map((post) => (
+              <article key={post.slug} className="group">
+                <Link href={`/blog/${post.slug}`} className="block">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded">
+                          {categoryLabels[post.category]}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {post.date}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          · {post.readingTime}
+                        </span>
+                      </div>
+                      <h2 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors mb-2">
+                        {post.title}
+                      </h2>
+                      <p className="text-muted-foreground line-clamp-2">
+                        {post.excerpt}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
