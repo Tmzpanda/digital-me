@@ -14,7 +14,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://timzhang.me"),
-  title: "Chat with Tim",
+  title: {
+    default: "Chat with Tim",
+    template: "%s",
+  },
   description:
     "Chat with Tim's AI to learn about his experience as a Data Engineer at Meta, his GCP certifications, and data engineering projects.",
   icons: {

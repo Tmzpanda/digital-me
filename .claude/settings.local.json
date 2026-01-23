@@ -58,7 +58,11 @@
       "Bash(/bin/echo:*)",
       "Bash(git rev-parse:*)",
       "Bash(test:*)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:digital-me-tmzpanda.vercel.app)",
+      "WebFetch(domain:digital-me.vercel.app)",
+      "WebFetch(domain:tmzpanda.vercel.app)",
+      "WebFetch(domain:digital-p8ybdz1hi-tmzpanda-5756s-projects.vercel.app)"
     ]
   }
 }
