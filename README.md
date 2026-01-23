@@ -2,7 +2,7 @@
 
 A personal website with an AI chatbot that speaks as you. Built with Next.js, Claude API, and deployed on Vercel.
 
-**Live Demo:** [timzhang.me](https://timzhang.me)
+**Live Demo:** [timzhang.me/work](https://timzhang.me/work)
 
 ## Features
 
