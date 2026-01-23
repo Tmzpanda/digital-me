@@ -41,6 +41,7 @@ export function ChatInput({
         disabled={isLoading}
         className="flex-1 bg-background/80 border-border/40 focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:border-primary/40 transition-all text-sm"
         autoComplete="off"
+        autoFocus
       />
       <Button
         type="submit"

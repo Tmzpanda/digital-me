@@ -95,10 +95,10 @@ export default function WorkPage() {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-border/50 bg-card/50 text-sm font-medium"
+                  className="group flex items-center gap-2 px-4 py-2.5 rounded-full border border-border/50 bg-card/50 text-sm font-medium transition-all duration-200 hover:bg-card hover:border-border hover:shadow-soft hover:scale-105"
                 >
-                  {link.icon}
-                  <span className="text-foreground/80">{link.label}</span>
+                  <span className="transition-transform duration-200 group-hover:scale-110">{link.icon}</span>
+                  <span className="text-foreground/80 group-hover:text-foreground transition-colors">{link.label}</span>
                 </a>
               ))}
             </div>

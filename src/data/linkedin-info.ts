@@ -8,7 +8,7 @@ export const linkedinInfo = `
 Data Engineer at Meta | GCP Certified Cloud Architect, Data Engineer & ML Engineer
 
 ## About
-Hi, I'm Tim! 👋 I’m a software engineer with 5 years of experience in big data development, meanwhile I'm a Google Cloud certified professional cloud architect, data engineer and machine learning engineer. 
+Hi, I'm Tim! 👋 I'm a software engineer with 5 years of experience in big data development, meanwhile I'm a Google Cloud certified professional cloud architect, data engineer and machine learning engineer.
 
 I got lucky to work in excellent teams and learned valuable skills.
 - Build distributed data platforms that manage large-scale data throughout the entire lifecycle, from collection, processing to storage and serving, to help teams make data-driven decisions and develop data products.

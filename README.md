@@ -2,11 +2,11 @@
 
 A personal website with an AI chatbot that speaks as you. Built with Next.js, Claude API, and deployed on Vercel.
 
-**Live Demo:** [timzhang.me/work](https://timzhang.me/work)
+**Live Demo:** [timzhang.me](https://timzhang.me)
 
 ## Features
 
-- Clean, minimal profile page with social links
+- Landing page with profile photo and navigation
 - AI chatbot powered by Claude that answers questions as you
 - Dynamic resume fetching from Google Docs (with 24-hour caching)
 - Responsive design for mobile and desktop
@@ -18,7 +18,7 @@ A personal website with an AI chatbot that speaks as you. Built with Next.js, Cl
 ```bash
 git clone https://github.com/tmzpanda/digital-me.git
 cd digital-me
-npm install
+pnpm install
 ```
 
 ### 2. Set Up Environment
@@ -62,7 +62,7 @@ const actionLinks = [
 ### 4. Run Locally
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Visit [localhost:3000](http://localhost:3000)
@@ -81,55 +81,47 @@ npx vercel env add ANTHROPIC_API_KEY production
 ## Project Structure
 
 ```
-src/
-├── app/
-│   ├── page.tsx              # Redirects to /work
-│   ├── work/page.tsx         # Main profile page
-│   ├── layout.tsx            # Site metadata
-│   └── api/chat/route.ts     # Claude API endpoint
-├── components/chat/          # Chat UI components
-├── data/
-│   ├── resume-context.ts     # Fallback resume content
-│   └── linkedin-info.ts      # LinkedIn profile info
-└── lib/
-    └── fetch-resume.ts       # Google Doc fetching + AI prompt
+digital-me/
+├── public/
+│   ├── images/profile.jpg
+│   └── favicon.jpg
+├── src/
+│   ├── app/
+│   │   ├── page.tsx              # Landing page
+│   │   ├── work/page.tsx         # Profile + AI chatbot
+│   │   ├── blog/page.tsx         # Blog (coming soon)
+│   │   ├── life/page.tsx         # Life (coming soon)
+│   │   ├── layout.tsx            # Site metadata
+│   │   └── api/chat/route.ts     # Claude API endpoint
+│   ├── components/
+│   │   ├── chat/                 # Chat UI components
+│   │   ├── landing/              # Landing page components
+│   │   └── ui/                   # Shared UI components
+│   ├── data/
+│   │   ├── resume-context.ts     # Fallback resume content
+│   │   └── linkedin-info.ts      # LinkedIn profile info
+│   └── lib/
+│       ├── fetch-resume.ts       # Google Doc fetching + AI prompt
+│       ├── navigation-config.ts  # Nav items config
+│       └── utils.ts              # Utility functions
+├── package.json
+├── next.config.js
+└── tsconfig.json
 ```
 
-## Claude Code Prompt
+## Routes
 
-If you want to build this from scratch using Claude Code, use this prompt:
-
----
-
-```
-Build me a personal website with these features:
-
-1. **Layout**: Profile photo + name + title on the left, AI chatbot on the right
-2. **Social Links**: LinkedIn, GitHub, Email with official brand icons
-3. **AI Chatbot**:
-   - Uses Claude API via Vercel AI SDK
-   - Speaks in first person as me (not "Tim is..." but "I am...")
-   - Fetches my resume from a Google Doc (publish as plain text)
-   - Caches the resume for 24 hours
-   - Refuses personal questions, redirects to work topics
-4. **Tech Stack**: Next.js 15+, TypeScript, Tailwind CSS, shadcn/ui
-5. **Deployment**: Vercel with custom domain
-
-Make the design clean and minimal. The chatbot is the main feature.
-```
-
----
-
-## Customization Tips
-
-- **Add more pages**: Create folders like `src/app/life/`, `src/app/thoughts/`
-- **Change AI model**: Update model in `src/app/api/chat/route.ts`
-- **Adjust caching**: Change `CACHE_DURATION` in `src/lib/fetch-resume.ts`
-- **Update metadata**: Edit `src/app/layout.tsx` for SEO
+| Route | Description |
+|-------|-------------|
+| `/` | Landing page with navigation |
+| `/work` | Profile page with AI chatbot |
+| `/blog` | Blog (coming soon) |
+| `/life` | Life section (coming soon) |
 
 ## Tech Stack
 
 - [Next.js 16](https://nextjs.org/) - React framework
+- [TypeScript](https://typescriptlang.org/) - Type safety
 - [Tailwind CSS](https://tailwindcss.com/) - Styling
 - [Vercel AI SDK](https://sdk.vercel.ai/) - AI integration
 - [Claude API](https://anthropic.com/) - AI model

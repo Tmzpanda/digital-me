@@ -1,6 +1,6 @@
 export default function LifePage() {
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="text-center max-w-md">
         <h1 className="text-3xl font-bold text-foreground mb-4">Life</h1>
         <p className="text-muted-foreground mb-8">
