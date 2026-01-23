@@ -67,8 +67,9 @@ export default function WorkPage() {
                 <Image
                   src={personalInfo.profileImage}
                   alt={personalInfo.name}
-                  width={112}
-                  height={112}
+                  width={224}
+                  height={224}
+                  quality={95}
                   className="w-full h-full object-cover"
                   priority
                 />

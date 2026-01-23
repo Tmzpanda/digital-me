@@ -19,8 +19,9 @@ export function LandingHero() {
             <Image
               src={personalInfo.profileImage}
               alt={personalInfo.name}
-              width={128}
-              height={128}
+              width={256}
+              height={256}
+              quality={95}
               className="w-full h-full object-cover"
               priority
             />
