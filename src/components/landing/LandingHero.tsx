@@ -5,7 +5,6 @@ import { navItems } from "@/lib/navigation-config";
 const personalInfo = {
   name: "Tianming Zhang",
   chineseName: "张天明",
-  tagline: "天色渐明，世界正变得清晰",
   profileImage: "/images/profile.jpg",
 };
 
