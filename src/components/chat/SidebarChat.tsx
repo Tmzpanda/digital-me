@@ -34,7 +34,7 @@ export function SidebarChat() {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, isLoading]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -82,6 +82,18 @@ export function SidebarChat() {
               />
             );
           })}
+          {/* Typing indicator - shows when waiting for AI response */}
+          {status === "submitted" && (
+            <div className="flex gap-3 mb-3">
+              <div className="bg-muted/70 rounded-2xl rounded-bl-sm px-4 py-3 border border-border/30 shadow-sm">
+                <div className="flex gap-1.5 items-center">
+                  <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                  <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                  <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
