@@ -16,8 +16,8 @@ export const navItems: NavItem[] = [
     description: "Chat with my AI about my professional experience",
   },
   {
-    label: "Life",
-    href: "/life",
-    description: "Beyond the code",
+    label: "Team",
+    href: "/team",
+    description: "Meet my AI agents",
   },
 ];
