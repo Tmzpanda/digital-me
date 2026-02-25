@@ -14,7 +14,7 @@ export function LandingHero() {
       <div className="max-w-2xl mx-auto text-center">
         {/* Profile Photo */}
         <Link href="/" className="avatar-glow relative mb-12 inline-block group">
-          <div className="w-40 h-40 rounded-full overflow-hidden border-2 border-border/50 shadow-soft-lg ring-4 ring-background transition-transform duration-200 group-hover:scale-105">
+          <div className="w-40 h-40 rounded-full overflow-hidden border-2 border-border/50 shadow-soft-lg ring-4 ring-background">
             <Image
               src={personalInfo.profileImage}
               alt={personalInfo.name}

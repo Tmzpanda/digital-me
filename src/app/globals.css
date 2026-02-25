@@ -256,20 +256,7 @@
 
   /* Avatar glow effect */
   .avatar-glow {
-    @apply relative;
-  }
-
-  .avatar-glow::before {
-    content: "";
-    @apply absolute inset-0 rounded-full opacity-0;
-    @apply transition-opacity duration-300;
-    background: radial-gradient(circle, rgba(120, 180, 200, 0.3) 0%, transparent 70%);
-    transform: scale(1.2);
-    z-index: -1;
-  }
-
-  .avatar-glow:hover::before {
-    @apply opacity-100;
+    @apply relative cursor-pointer;
   }
 
   /* Section heading style */
