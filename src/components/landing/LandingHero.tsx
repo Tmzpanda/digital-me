@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { navItems } from "@/lib/navigation-config";
+import { AvatarEasterEgg } from "./AvatarEasterEgg";
 
 const personalInfo = {
   name: "Tianming Zhang",
@@ -13,19 +13,10 @@ export function LandingHero() {
     <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8">
       <div className="max-w-2xl mx-auto text-center">
         {/* Profile Photo */}
-        <Link href="/" className="avatar-glow relative mb-12 inline-block group">
-          <div className="w-40 h-40 rounded-full overflow-hidden border-2 border-border/50 shadow-soft-lg ring-4 ring-background">
-            <Image
-              src={personalInfo.profileImage}
-              alt={personalInfo.name}
-              width={320}
-              height={320}
-              quality={95}
-              className="w-full h-full object-cover"
-              priority
-            />
-          </div>
-        </Link>
+        <AvatarEasterEgg
+          profileImage={personalInfo.profileImage}
+          name={personalInfo.name}
+        />
 
         {/* Navigation Cards */}
         <div className="grid sm:grid-cols-3 gap-4">
