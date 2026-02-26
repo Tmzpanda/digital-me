@@ -275,7 +275,7 @@ function OrgCard({
 /*  AgentSlot — wraps a card + its floating profile                    */
 /* ------------------------------------------------------------------ */
 
-const PANEL_W = 300;
+const PANEL_W_MAX = 300;
 const PANEL_PAD = 12;
 
 function AgentSlot({
@@ -322,14 +322,15 @@ function AgentSlot({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
-  // Compute horizontal offset so panel stays within viewport
+  // Compute panel width (responsive) and horizontal offset
+  const vw = typeof window !== "undefined" ? window.innerWidth : 400;
+  const panelW = Math.min(PANEL_W_MAX, vw - PANEL_PAD * 2);
+
   const panelLeft = (() => {
     if (!cardRef.current) return 0;
     const rect = cardRef.current.getBoundingClientRect();
-    const vw = window.innerWidth;
-    const centered = rect.left + rect.width / 2 - PANEL_W / 2;
-    const clamped = Math.max(PANEL_PAD, Math.min(centered, vw - PANEL_W - PANEL_PAD));
-    // Return as offset from the card's left edge
+    const centered = rect.left + rect.width / 2 - panelW / 2;
+    const clamped = Math.max(PANEL_PAD, Math.min(centered, vw - panelW - PANEL_PAD));
     return clamped - rect.left;
   })();
 
@@ -366,7 +367,7 @@ function AgentSlot({
             top: "100%",
             left: panelLeft,
             marginTop: 10,
-            width: PANEL_W,
+            width: panelW,
             padding: "20px 22px",
             borderRadius: 16,
             background: "rgba(255,255,255,0.85)",
@@ -565,14 +566,14 @@ export function OrgChart() {
                   >
                     {group.label}
                   </div>
-                  <div style={{ display: "flex", gap: 14 }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
                     {group.agents.map((agent) => (
                       <AgentSlot
                         key={agent.id}
                         agent={agent}
                         selected={selectedId === agent.id}
                         onSelect={() => toggleAgent(agent.id)}
-                        width={160}
+                        width={140}
                       />
                     ))}
                   </div>
