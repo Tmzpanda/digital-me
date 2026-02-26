@@ -21,7 +21,7 @@ export function SidebarChat() {
         parts: [
           {
             type: "text",
-            text: "Hey! 👋 I'm Tim. Ask me anything - about my work, tech opinions, or career advice!\n\nTry:\n• What do you do at Meta?\n• What's your favorite tech stack?\n• Any advice for aspiring data engineers?",
+            text: "Hey! 👋 I'm Tim. Ask me anything - about my work, tech opinions, or career advice!",
           },
         ],
       },

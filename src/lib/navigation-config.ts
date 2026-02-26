@@ -11,13 +11,18 @@ export const navItems: NavItem[] = [
     description: "Thoughts and writings",
   },
   {
-    label: "Work",
-    href: "/work",
-    description: "Chat with my AI about my professional experience",
+    label: "Artifacts",
+    href: "/artifacts",
+    description: "Things I've built",
   },
   {
     label: "Team",
     href: "/team",
     description: "Meet my AI agents",
+  },
+  {
+    label: "Work",
+    href: "/work",
+    description: "Chat with my AI about my professional experience",
   },
 ];
