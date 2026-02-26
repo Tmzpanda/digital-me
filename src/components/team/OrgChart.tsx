@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronUp, ChevronDown } from "lucide-react";
@@ -196,6 +196,16 @@ export function OrgChart() {
   const [expanded, setExpanded] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  // Reset transition styles when navigating back (bfcache / popstate)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (el) {
+      el.style.transition = "none";
+      el.style.transform = "";
+      el.style.opacity = "";
+    }
+  }, []);
 
   const handleVisitOffice = (e: React.MouseEvent) => {
     e.preventDefault();
