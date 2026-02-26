@@ -62,7 +62,15 @@
       "WebFetch(domain:digital-me-tmzpanda.vercel.app)",
       "WebFetch(domain:digital-me.vercel.app)",
       "WebFetch(domain:tmzpanda.vercel.app)",
-      "WebFetch(domain:digital-p8ybdz1hi-tmzpanda-5756s-projects.vercel.app)"
+      "WebFetch(domain:digital-p8ybdz1hi-tmzpanda-5756s-projects.vercel.app)",
+      "Bash(npx next build 2>&1 | tail -20)",
+      "Bash(npx next build 2>&1 | tail -30)",
+      "Bash(npx next build 2>&1 | tail -15)",
+      "Bash(gh api repos/Tmzpanda/digital-me/deployments --jq '.[0] | {id, environment, created_at, updated_at}')",
+      "Bash(gh api repos/Tmzpanda/digital-me/deployments/3926329101/statuses --jq '.[0] | {state, description, created_at, target_url}')",
+      "Bash(gh api repos/Tmzpanda/digital-me/deployments --jq '.[:3] | .[] | {id, environment, sha: .sha[:7], created_at, description}')",
+      "Bash(gh api repos/Tmzpanda/digital-me/deployments/3926329101/statuses --jq '.[0].target_url')",
+      "Bash(sleep 30 && gh api repos/Tmzpanda/digital-me/deployments --jq '.[0] | {sha: .sha[:7], environment, created_at}' && gh api repos/Tmzpanda/digital-me/deployments --jq '.[0].id' | xargs -I{} gh api repos/Tmzpanda/digital-me/deployments/{}/statuses --jq '.[0] | {state, description}')"
     ]
   }
 }
