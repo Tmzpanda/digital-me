@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronUp, ChevronDown } from "lucide-react";
@@ -194,26 +194,21 @@ function OrgCard({ agent }: { agent: Agent }) {
 
 export function OrgChart() {
   const [expanded, setExpanded] = useState(true);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [leaving, setLeaving] = useState(false);
   const router = useRouter();
 
-  // Reset transition styles when navigating back (bfcache / popstate)
+  // Reset on bfcache restore (browser back after full navigation)
   useEffect(() => {
-    const el = containerRef.current;
-    if (el) {
-      el.style.transition = "none";
-      el.style.transform = "";
-      el.style.opacity = "";
-    }
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setLeaving(false);
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
   }, []);
 
   const handleVisitOffice = (e: React.MouseEvent) => {
     e.preventDefault();
-    const el = containerRef.current;
-    if (!el) return;
-    el.style.transition = "transform 0.45s ease-in-out, opacity 0.4s ease-in-out";
-    el.style.transform = "translateX(-100%)";
-    el.style.opacity = "0";
+    setLeaving(true);
     setTimeout(() => router.push("/office"), 450);
   };
 
@@ -231,7 +226,18 @@ export function OrgChart() {
   const ungrouped = reports.filter((a) => !a.group);
 
   return (
-    <div ref={containerRef} className="min-h-screen" style={{ background: "#fff", overflow: "hidden" }}>
+    <div
+      className="min-h-screen"
+      style={{
+        background: "#fff",
+        overflow: "hidden",
+        transform: leaving ? "translateX(-100%)" : "none",
+        opacity: leaving ? 0 : 1,
+        transition: leaving
+          ? "transform 0.45s ease-in-out, opacity 0.4s ease-in-out"
+          : "none",
+      }}
+    >
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "56px 20px 32px" }}>
         {/* ─── ROOT CARD ─── */}
         <div className="flex flex-col items-center">
