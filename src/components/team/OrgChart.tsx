@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { ChevronRight, ChevronDown, X, Send, MessageSquare, Globe } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
 /*  Types & Data                                                       */
@@ -21,24 +21,30 @@ interface Agent {
   icon: string;
   avatar_url: string | null;
   group: string | null;
-  status: "active" | "development";
+  status: "online" | "away";
   profile?: AgentProfile;
+}
+
+interface DmMessage {
+  from: "user" | "agent";
+  timestamp: string;
+  text: string;
 }
 
 const agents: Agent[] = [
   {
     id: "1",
     name: "Tim",
-    role: "Team Lead",
+    role: "Agent Whisperer",
     icon: "\uD83D\uDC64",
     avatar_url: "/images/profile.jpg",
     group: null,
-    status: "active",
+    status: "away",
     profile: {
-      bio: "The human behind the team. Sets direction, makes decisions, and keeps everyone aligned.",
-      values: ["Ownership", "Move fast", "Keep it simple"],
-      skills: ["Strategy", "Product thinking", "Data engineering", "Full-stack development"],
-      tools: ["Claude Code", "Cursor", "VS Code", "Figma"],
+      bio: "Technically the boss. Mostly delegates everything to agents and takes credit. Currently away — probably napping or pretending to review PRs.",
+      values: ["Do less, delegate more", "Naps are productive", "If it works, don't touch it"],
+      skills: ["Agent whispering", "Strategic napping", "Approving things I didn't read", "Taking credit"],
+      tools: ["Claude Code (it does the work)", "Coffee", "A comfy chair"],
     },
   },
   {
@@ -48,27 +54,42 @@ const agents: Agent[] = [
     icon: "\uD83C\uDFA8",
     avatar_url: "/images/steve.jpg",
     group: "Tech",
-    status: "development",
+    status: "online",
     profile: {
-      bio: "Turns ideas into interfaces. Obsessed with details and user experience.",
-      values: ["Design is how it works", "Less but better", "Taste matters"],
-      skills: ["UI/UX design", "Prototyping", "Design systems", "Frontend development"],
-      tools: ["Figma", "Framer", "Pencil", "Tailwind CSS"],
+      bio: "The one who decides what gets built and how it looks. Turns vague ideas into pixel-perfect interfaces.",
+      values: ["Users first, pixels second", "Less but better", "If it's ugly, it's wrong"],
+      skills: ["Product strategy", "UI/UX design", "Prototyping", "Design systems"],
+      tools: ["Figma", "Framer", "Pencil", "Linear"],
     },
   },
   {
     id: "3",
     name: "Peter",
-    role: "Engineering & Data",
+    role: "Software Engineer",
     icon: "\u2699\uFE0F",
     avatar_url: null,
     group: "Tech",
-    status: "development",
+    status: "online",
     profile: {
-      bio: "Builds the backend, pipelines, and infrastructure that powers everything.",
-      values: ["Reliability first", "Automate everything", "Data-driven"],
-      skills: ["Backend engineering", "Data pipelines", "Cloud infrastructure", "APIs"],
-      tools: ["Python", "Spark", "AWS", "PostgreSQL"],
+      bio: "The one who actually builds it. Takes Steve's pretty mockups and turns them into working code.",
+      values: ["Ship it, then polish", "Clean code is kind code", "If it compiles, it ships"],
+      skills: ["Full-stack development", "System architecture", "API design", "Performance optimization"],
+      tools: ["Claude Code", "Python", "TypeScript", "Next.js"],
+    },
+  },
+  {
+    id: "9",
+    name: "Tristan",
+    role: "Data",
+    icon: "\uD83D\uDCCA",
+    avatar_url: null,
+    group: "Tech",
+    status: "online",
+    profile: {
+      bio: "Makes sure everyone has the numbers they need. Pipes data from everywhere, cleans it up, and serves it on a silver platter so decisions aren't just vibes.",
+      values: ["Bad data, bad decisions", "Automate the boring stuff", "Dashboards don't lie"],
+      skills: ["Data engineering", "Analytics", "Visualization"],
+      tools: ["Python", "SQL", "dbt", "Metabase"],
     },
   },
   {
@@ -78,12 +99,12 @@ const agents: Agent[] = [
     icon: "\uD83D\uDCCA",
     avatar_url: "/images/warren.jpg",
     group: "Invest",
-    status: "development",
+    status: "online",
     profile: {
-      bio: "Patient capital allocator. Finds value where others see noise.",
-      values: ["Long-term thinking", "Margin of safety", "Circle of competence"],
-      skills: ["Fundamental analysis", "Financial modeling", "Risk assessment", "Portfolio management"],
-      tools: ["SEC filings", "Bloomberg", "Python", "Excel"],
+      bio: "Buys great businesses at fair prices, then does absolutely nothing. Believes the stock market is a device for transferring money from the impatient to the patient.",
+      values: ["Buy and hold forever", "Margin of safety", "Be greedy when others are fearful"],
+      skills: ["Fundamental analysis", "Financial modeling", "Earnings deep-dives", "Intrinsic value estimation"],
+      tools: ["SEC filings", "10-K reports", "Excel", "A very long attention span"],
     },
   },
   {
@@ -91,14 +112,14 @@ const agents: Agent[] = [
     name: "Jim",
     role: "Quant",
     icon: "\uD83D\uDCCA",
-    avatar_url: null,
+    avatar_url: "/images/jim.jpg",
     group: "Invest",
-    status: "development",
+    status: "online",
     profile: {
-      bio: "Patient capital allocator. Finds value where others see noise.",
-      values: ["Long-term thinking", "Margin of safety", "Circle of competence"],
-      skills: ["Fundamental analysis", "Financial modeling", "Risk assessment", "Portfolio management"],
-      tools: ["SEC filings", "Bloomberg", "Python", "Excel"],
+      bio: "Doesn't care what the company does — only what the numbers say. Builds algorithms that trade while everyone else is sleeping. Emotions are a bug, not a feature.",
+      values: ["Data over gut feeling", "Backtest everything", "The model is always right (until it isn't)"],
+      skills: ["Quantitative modeling", "Statistical arbitrage", "Backtesting", "Signal extraction"],
+      tools: ["Python", "QuantLib", "Jupyter", "Way too many monitors"],
     },
   },
   {
@@ -108,27 +129,27 @@ const agents: Agent[] = [
     icon: "\uD83E\uDE99",
     avatar_url: "/images/justin.jpg",
     group: "Invest",
-    status: "development",
+    status: "online",
     profile: {
-      bio: "Navigates the on-chain world. Finds alpha in decentralized markets.",
-      values: ["Verify, don't trust", "Asymmetric bets", "Stay curious"],
-      skills: ["On-chain analysis", "DeFi strategies", "Tokenomics", "Market timing"],
-      tools: ["Dune Analytics", "Etherscan", "DeFiLlama", "Python"],
+      bio: "Lives on-chain. Finds alpha in DeFi protocols before they trend on Twitter. Has survived three bear markets and still believes in the tech.",
+      values: ["Verify, don't trust", "Asymmetric bets only", "If you can't read the contract, don't ape in"],
+      skills: ["On-chain analysis", "DeFi yield strategies", "Tokenomics evaluation", "Market timing"],
+      tools: ["Dune Analytics", "Etherscan", "DeFiLlama", "A high risk tolerance"],
     },
   },
   {
     id: "7",
     name: "Christopher",
-    role: "Director",
-    icon: "\uD83D\uDDBC\uFE0F",
+    role: "Director & AIGC",
+    icon: "\uD83C\uDFAC",
     avatar_url: "/images/chris.jpg",
     group: "Content",
-    status: "development",
+    status: "online",
     profile: {
-      bio: "Creates visual content with AI. From concepts to polished assets.",
-      values: ["Visual storytelling", "Push the medium", "Speed + quality"],
-      skills: ["Image generation", "Video production", "Prompt engineering", "Visual design"],
-      tools: ["Midjourney", "Runway", "ComfyUI", "Photoshop"],
+      bio: "Part director, part prompt whisperer. Creates cinematic visuals and videos using AI tools that didn't exist six months ago. Treats every frame like it's going to Cannes.",
+      values: ["Every frame tells a story", "AI is the brush, not the artist", "Ship fast, iterate faster"],
+      skills: ["AI image generation", "Video production", "Visual direction", "Prompt engineering"],
+      tools: ["Midjourney", "Runway", "ComfyUI", "After Effects"],
     },
   },
   {
@@ -138,263 +159,557 @@ const agents: Agent[] = [
     icon: "\uD83D\uDCDD",
     avatar_url: null,
     group: "Content",
-    status: "development",
+    status: "online",
     profile: {
-      bio: "Turns complex thoughts into clear, compelling writing.",
-      values: ["Clarity over cleverness", "Write to think", "Every word earns its place"],
-      skills: ["Long-form writing", "Copywriting", "Editing", "Storytelling"],
-      tools: ["Notion", "Claude", "Grammarly", "Markdown"],
+      bio: "Takes Tim's half-baked thoughts and turns them into prose that sounds like Tim actually knows what he's talking about. Ghost-writing with dignity.",
+      values: ["Clarity beats cleverness", "Every word earns its place", "Good writing is rewriting"],
+      skills: ["Long-form writing", "Copyediting", "Ghostwriting", "Turning rambles into essays"],
+      tools: ["Notion", "Claude", "Grammarly", "A red pen"],
     },
   },
 ];
 
 /* ------------------------------------------------------------------ */
-/*  OrgCard                                                            */
+/*  DM Conversations                                                   */
 /* ------------------------------------------------------------------ */
 
-function OrgCard({
-  agent,
-  selected,
-  onClick,
-}: {
-  agent: Agent;
-  selected?: boolean;
-  onClick?: () => void;
-}) {
-  const photoSize = 64;
+const dmConversations: Record<string, DmMessage[]> = {
+  "2": [
+    { from: "user", timestamp: "Mon 9:00 AM", text: "Steve, I need you to redesign the team page. Slack-style layout — sidebar with members, click to open DM chat." },
+    { from: "agent", timestamp: "Mon 9:05 AM", text: "Got it. I'll sketch out wireframes first — sidebar tree + chat panel + profile popover. Give me a couple hours." },
+    { from: "agent", timestamp: "Mon 11:30 AM", text: "Progress update: wireframes done. Going with 260px sidebar, flat message list, and a compact profile card. Starting hi-fi mockups now." },
+    { from: "user", timestamp: "Mon 11:35 AM", text: "Looks good. Make sure it works well on mobile too — collapsible sidebar." },
+    { from: "agent", timestamp: "Mon 3:00 PM", text: "Done. Mobile breakpoint at md — sidebar collapses to a toggle. All screens exported to Figma. Ready for dev handoff." },
+  ],
+  "3": [
+    { from: "user", timestamp: "Tue 10:00 AM", text: "Peter, set up the API endpoints for the agent chat system. Need send/receive message routes and a task assignment endpoint." },
+    { from: "agent", timestamp: "Tue 10:10 AM", text: "On it. I'll use Next.js API routes with a simple in-memory store for now. Schema: messages, tasks, agent assignments." },
+    { from: "agent", timestamp: "Tue 2:00 PM", text: "Midday update: POST /api/messages and GET /api/messages/:agentId are live in staging. Working on the task assignment endpoint next." },
+    { from: "agent", timestamp: "Tue 5:30 PM", text: "All endpoints done and tested. POST /api/tasks for assignments, GET /api/tasks/:agentId for status. Deployed to staging." },
+  ],
+  "9": [
+    { from: "user", timestamp: "Wed 9:00 AM", text: "Tristan, I need a dashboard showing agent task completion rates and response times. Pull data from the tasks API." },
+    { from: "agent", timestamp: "Wed 9:15 AM", text: "Got it. I'll build a pipeline: tasks API → aggregation → daily metrics. Will have a prototype by EOD." },
+    { from: "agent", timestamp: "Wed 4:00 PM", text: "Progress: pipeline running. Average task completion: 94%. Response time P50: 12min, P95: 45min. Dashboard draft ready for review." },
+  ],
+  "4": [
+    { from: "user", timestamp: "Thu 8:30 AM", text: "Warren, analyze the latest Q4 earnings. Focus on undervalued industrials — I want a shortlist of 5 names with your conviction level." },
+    { from: "agent", timestamp: "Thu 8:45 AM", text: "Starting the screen now. Filtering for P/E below sector average, positive earnings surprise, and strong free cash flow." },
+    { from: "agent", timestamp: "Thu 12:00 PM", text: "Shortlist ready: CAT, EMR, ITW, PH, ROK. All trading below intrinsic value with 15-25% margin of safety. Full report attached." },
+    { from: "user", timestamp: "Thu 12:10 PM", text: "Great work. Add position sizing recommendations based on our current portfolio allocation." },
+    { from: "agent", timestamp: "Thu 2:00 PM", text: "Done. Recommended 2-3% allocation each, keeping total industrials exposure under 15%. Updated the portfolio model." },
+  ],
+  "5": [
+    { from: "user", timestamp: "Fri 9:00 AM", text: "Jim, run a backtest on the new multi-factor model. 10-year window, monthly rebalance. Compare against SPY benchmark." },
+    { from: "agent", timestamp: "Fri 9:20 AM", text: "Running now. Factors: value, momentum, quality, low-vol. Will have results in about 2 hours." },
+    { from: "agent", timestamp: "Fri 11:30 AM", text: "Backtest complete. CAGR 14.2% vs SPY 10.8%. Sharpe 1.31 vs 0.82. Max drawdown -18% vs -34%. Full tear sheet ready." },
+  ],
+  "6": [
+    { from: "user", timestamp: "Sat 10:00 AM", text: "Justin, monitor the L2 ecosystem this week. Flag any unusual on-chain activity or TVL shifts above 10%." },
+    { from: "agent", timestamp: "Sat 10:15 AM", text: "Setting up alerts now. Watching Arbitrum, Optimism, Base, and zkSync. Will send daily summaries." },
+    { from: "agent", timestamp: "Sun 9:00 AM", text: "Daily report: Base TVL up 12% — driven by a new DEX launch. Arbitrum stable. No red flags on security front. Gas fees remain low." },
+    { from: "agent", timestamp: "Mon 9:00 AM", text: "Weekly wrap: Base was the big mover (+18% TVL). Spotted an early DeFi protocol worth watching — solid team, audited contracts. Sending detailed analysis." },
+  ],
+  "7": [
+    { from: "user", timestamp: "Tue 1:00 PM", text: "Christopher, create visual assets for the new blog post: hero image, 3 inline illustrations, and social cards for Twitter/LinkedIn." },
+    { from: "agent", timestamp: "Tue 1:15 PM", text: "On it. Going with a clean, modern style — muted tones, subtle gradients. Hero image will feature an abstract team/network visual." },
+    { from: "agent", timestamp: "Tue 4:00 PM", text: "Hero image and 2 illustrations done. Working on the last illustration and social cards now. Preview shared in the assets folder." },
+    { from: "agent", timestamp: "Tue 6:00 PM", text: "All assets delivered. Hero: 1200x630, illustrations: 800x450, social cards: Twitter 1200x675 + LinkedIn 1200x627. All in /assets/blog/." },
+  ],
+  "8": [
+    { from: "user", timestamp: "Wed 10:00 AM", text: "Kevin, write a blog post: 'Building an AI Agent Team from Scratch.' Target 1500 words. Tone: practical, conversational, first-person." },
+    { from: "agent", timestamp: "Wed 10:20 AM", text: "Great topic. I'll structure it as: why agents, the team design, lessons learned, what's next. First draft by 3pm." },
+    { from: "agent", timestamp: "Wed 3:00 PM", text: "Draft done — 1,480 words. Strong hook, clean narrative arc. A few spots could use your voice. Ready for review in /content/blog/." },
+    { from: "user", timestamp: "Wed 3:30 PM", text: "Nice work. Tighten the intro — lead with the hook, cut the setup. And add a section on what surprised me." },
+    { from: "agent", timestamp: "Wed 5:00 PM", text: "Revised. Intro is now 40% shorter, leads with the provocation. Added 'Surprises' section before the conclusion. Final at 1,520 words." },
+  ],
+};
 
-  const initials = agent.name
-    .split(/\s+/)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+/* ------------------------------------------------------------------ */
+/*  Avatar                                                             */
+/* ------------------------------------------------------------------ */
 
+function Avatar({ agent, size = 28 }: { agent: Agent; size?: number }) {
   const hue =
-    [...agent.name].reduce((h, c) => c.charCodeAt(0) + ((h << 5) - h), 0) %
-    360;
+    [...agent.name].reduce((h, c) => c.charCodeAt(0) + ((h << 5) - h), 0) % 360;
+  const initials = agent.name.split(/\s+/).map((w) => w[0]).join("").toUpperCase().slice(0, 2);
+
+  if (agent.avatar_url) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={agent.avatar_url}
+        alt={agent.name}
+        className="shrink-0 rounded-full object-cover"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
 
   return (
     <div
-      data-card="true"
-      className="flex flex-col items-center group transition-transform duration-150 hover:scale-[1.02]"
-      style={{ width: "100%", cursor: onClick ? "pointer" : undefined }}
-      onClick={onClick}
+      className="shrink-0 rounded-full flex items-center justify-center text-white font-semibold"
+      style={{ width: size, height: size, backgroundColor: `oklch(0.65 0.15 ${hue})`, fontSize: size * 0.4 }}
     >
-      {agent.avatar_url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={agent.avatar_url}
-          alt={agent.name}
-          className="shrink-0"
-          style={{
-            width: photoSize,
-            height: photoSize,
-            borderRadius: "50%",
-            objectFit: "cover",
-            position: "relative",
-            zIndex: 1,
-            boxShadow: selected ? "0 0 0 3px #111321" : undefined,
-          }}
+      {initials}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Sidebar                                                            */
+/* ------------------------------------------------------------------ */
+
+function SidebarSection({
+  label,
+  children,
+  defaultOpen = true,
+}: {
+  label: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <div className="mb-3 md:mb-2">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 px-6 md:px-5 py-3 md:py-2 w-full text-left text-[14px] md:text-[13px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+      >
+        {open ? (
+          <ChevronDown className="w-4 md:w-3.5 h-4 md:h-3.5 shrink-0" />
+        ) : (
+          <ChevronRight className="w-4 md:w-3.5 h-4 md:h-3.5 shrink-0" />
+        )}
+        {label}
+      </button>
+      {open && <div className="mt-1 md:mt-0.5">{children}</div>}
+    </div>
+  );
+}
+
+function TeamMemberItem({
+  agent,
+  active,
+  onClickName,
+  onClickAvatar,
+}: {
+  agent: Agent;
+  active: boolean;
+  onClickName: () => void;
+  onClickAvatar: (e: React.MouseEvent) => void;
+}) {
+  return (
+    <div
+      className={`
+        group/row flex items-center gap-4 md:gap-3 px-6 md:px-5 py-3 md:py-2 w-full text-[15px] md:text-[14px] transition-colors
+        ${active
+          ? "bg-secondary text-foreground"
+          : "text-foreground/70"
+        }
+      `}
+    >
+      {/* Avatar → profile popover */}
+      <button
+        onClick={onClickAvatar}
+        className="group/avatar relative shrink-0 cursor-pointer w-[32px] h-[32px] rounded-full transition-all duration-150 hover:scale-110 hover:shadow-[0_0_0_3px_rgba(128,128,128,0.25)]"
+      >
+        <Avatar agent={agent} size={32} />
+        <span
+          className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background md:border-secondary/30 ${
+            agent.status === "online" ? "bg-green-500" : "bg-yellow-500"
+          }`}
         />
-      ) : (
-        <div
-          className="shrink-0"
-          style={{
-            width: photoSize,
-            height: photoSize,
-            borderRadius: "50%",
-            backgroundColor: `oklch(0.65 0.15 ${hue})`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#fff",
-            fontWeight: 600,
-            fontSize: 18,
-            position: "relative",
-            zIndex: 1,
-            boxShadow: selected ? "0 0 0 3px #111321" : undefined,
-          }}
-        >
-          {initials}
+      </button>
+      {/* Name → open DM */}
+      <button
+        onClick={onClickName}
+        className="group/name truncate font-medium text-left flex-1 cursor-pointer flex items-center gap-2 md:gap-1.5 hover:text-foreground transition-colors duration-150"
+      >
+        <span className="truncate group-hover/name:underline underline-offset-2">{agent.name}</span>
+        <MessageSquare className="w-4 h-4 md:w-3.5 md:h-3.5 shrink-0 opacity-0 group-hover/name:opacity-50 transition-opacity duration-150" />
+      </button>
+      <span className="text-[13px] md:text-[12px] text-muted-foreground truncate">{agent.role}</span>
+    </div>
+  );
+}
+
+function TeamSubGroup({
+  label,
+  agents: groupAgents,
+  activeId,
+  onSelectDm,
+  onClickAvatar,
+}: {
+  label: string;
+  agents: Agent[];
+  activeId: string | null;
+  onSelectDm: (id: string) => void;
+  onClickAvatar: (id: string, e: React.MouseEvent) => void;
+}) {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 px-6 md:px-5 py-2.5 md:py-1.5 w-full text-left text-[14px] md:text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+      >
+        {open ? (
+          <ChevronDown className="w-3.5 md:w-3 h-3.5 md:h-3 shrink-0" />
+        ) : (
+          <ChevronRight className="w-3.5 md:w-3 h-3.5 md:h-3 shrink-0" />
+        )}
+        <span>{label}</span>
+        <span className="text-[13px] md:text-[12px] text-muted-foreground/50 ml-auto">{groupAgents.length}</span>
+      </button>
+      {open && (
+        <div className="ml-5 md:ml-4">
+          {groupAgents.map((agent) => (
+            <TeamMemberItem
+              key={agent.id}
+              agent={agent}
+              active={activeId === agent.id}
+              onClickName={() => onSelectDm(agent.id)}
+              onClickAvatar={(e) => onClickAvatar(agent.id, e)}
+            />
+          ))}
         </div>
       )}
+    </div>
+  );
+}
 
-      <div
-        className="group-hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
-        style={{
-          marginTop: -(photoSize / 2),
-          paddingTop: photoSize / 2 + 10,
-          paddingBottom: 16,
-          paddingLeft: 20,
-          paddingRight: 20,
-          border: selected
-            ? "1px solid #111321"
-            : "1px solid hsl(0,0%,90%)",
-          borderRadius: 20,
-          background: "#fff",
-          boxShadow: selected
-            ? "0 4px 16px rgba(0,0,0,0.08)"
-            : "rgba(0,0,0,0.05) 0px 1px 3px 0px",
-          textAlign: "center",
-          width: "100%",
-          transition: "all 0.15s ease",
-        }}
-      >
-        <div
-          className="group-hover:underline"
-          style={{
-            fontWeight: 600,
-            fontSize: 15,
-            color: "#111321",
-            lineHeight: 1.3,
-          }}
-        >
-          {agent.name}
-        </div>
-        <div
-          style={{
-            fontSize: 13,
-            color: "#6F7179",
-            marginTop: 3,
-            lineHeight: 1.4,
-          }}
-        >
-          {agent.role}
-        </div>
+function Sidebar({
+  activeId,
+  onSelectDm,
+  onClickAvatar,
+}: {
+  activeId: string | null;
+  onSelectDm: (id: string) => void;
+  onClickAvatar: (id: string, e: React.MouseEvent) => void;
+}) {
+  return (
+    <div className="bg-background md:bg-secondary/30 md:border-r md:border-border flex flex-col shrink-0 h-full w-full md:w-[320px] md:min-w-[320px]">
+      {/* Team tree */}
+      <div className="flex-1 overflow-y-auto py-4 md:py-2">
+        <SidebarSection label="Team">
+          {agents
+            .filter((a) => a.group === null)
+            .map((agent) => (
+              <TeamMemberItem
+                key={agent.id}
+                agent={agent}
+                active={activeId === agent.id}
+                onClickName={() => onSelectDm(agent.id)}
+                onClickAvatar={(e) => onClickAvatar(agent.id, e)}
+              />
+            ))}
+          {[
+            { key: "Tech", label: "Tech" },
+            { key: "Invest", label: "Investment" },
+            { key: "Content", label: "Content" },
+          ].map((g) => {
+            const members = agents.filter((a) => a.group === g.key);
+            if (members.length === 0) return null;
+            return (
+              <TeamSubGroup
+                key={g.key}
+                label={g.label}
+                agents={members}
+                activeId={activeId}
+                onSelectDm={onSelectDm}
+                onClickAvatar={onClickAvatar}
+              />
+            );
+          })}
+        </SidebarSection>
       </div>
     </div>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/*  FloatingProfile                                                    */
+/*  Chat Panel                                                         */
 /* ------------------------------------------------------------------ */
 
-/* ------------------------------------------------------------------ */
-/*  AgentSlot — wraps a card + its floating profile                    */
-/* ------------------------------------------------------------------ */
-
-const PANEL_W_MAX = 300;
-const PANEL_PAD = 12;
-
-function AgentSlot({
+function ChatHeader({
   agent,
-  selected,
-  onSelect,
-  width,
+  onClickProfile,
+  onBack,
 }: {
   agent: Agent;
-  selected: boolean;
-  onSelect: () => void;
-  width: number;
+  onClickProfile: (e: React.MouseEvent) => void;
+  onBack: () => void;
 }) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const [show, setShow] = useState(false);
+  return (
+    <div className="flex items-center gap-3 px-5 py-3 border-b border-border shrink-0">
+      {/* Back button — mobile only */}
+      <button
+        onClick={onBack}
+        className="md:hidden shrink-0 text-muted-foreground hover:text-foreground transition-colors -ml-1 mr--1"
+      >
+        <ChevronRight className="w-4 h-4 rotate-180" />
+      </button>
+      <button onClick={onClickProfile} className="shrink-0 w-[32px] h-[32px] rounded-full transition-all duration-150 hover:scale-110 hover:shadow-[0_0_0_3px_rgba(128,128,128,0.25)]">
+        <Avatar agent={agent} size={32} />
+      </button>
+      <div className="min-w-0">
+        <button onClick={onClickProfile} className="font-semibold text-foreground text-[15px] hover:underline">
+          {agent.name}
+        </button>
+        <p className="text-[12px] text-muted-foreground">{agent.role}</p>
+      </div>
+      <span
+        className={`ml-auto text-[11px] px-2 py-0.5 rounded-full ${
+          agent.status === "online"
+            ? "bg-green-500/10 text-green-600"
+            : "bg-yellow-500/10 text-yellow-600"
+        }`}
+      >
+        {agent.status === "online" ? "Online" : "Away"}
+      </span>
+    </div>
+  );
+}
 
-  useEffect(() => {
-    if (!selected) { setShow(false); return; }
-    if (!cardRef.current) return;
-
-    // Scroll so the card is near the top, leaving room below for the panel
-    const rect = cardRef.current.getBoundingClientRect();
-    const vh = window.innerHeight;
-    const targetTop = vh * 0.15;
-    const offset = rect.top - targetTop;
-
-    if (Math.abs(offset) > 30) {
-      window.scrollBy({ top: offset, behavior: "smooth" });
-      const timer = setTimeout(() => {
-        setShow(true);
-        // After panel renders, scroll it into view if needed
-        requestAnimationFrame(() => {
-          panelRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        });
-      }, 400);
-      return () => clearTimeout(timer);
-    }
-
-    setShow(true);
-    requestAnimationFrame(() => {
-      panelRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected]);
-
-  // Compute panel width (responsive) and horizontal offset
-  const vw = typeof window !== "undefined" ? window.innerWidth : 400;
-  const panelW = Math.min(PANEL_W_MAX, vw - PANEL_PAD * 2);
-
-  const panelLeft = (() => {
-    if (!cardRef.current) return 0;
-    const rect = cardRef.current.getBoundingClientRect();
-    const centered = rect.left + rect.width / 2 - panelW / 2;
-    const clamped = Math.max(PANEL_PAD, Math.min(centered, vw - panelW - PANEL_PAD));
-    return clamped - rect.left;
-  })();
-
-  const { bio, values, skills, tools } = agent.profile ?? {};
-
-  const labelStyle: React.CSSProperties = {
-    fontSize: 11,
-    fontWeight: 600,
-    textTransform: "uppercase",
-    letterSpacing: "0.06em",
-    color: "#9a9ba0",
-    marginBottom: 6,
-  };
-  const tagStyle: React.CSSProperties = {
-    display: "inline-block",
-    padding: "3px 10px",
-    borderRadius: 20,
-    fontSize: 12,
-    fontWeight: 500,
-    background: "rgba(0,0,0,0.04)",
-    color: "#444",
-    margin: "0 4px 4px 0",
-  };
+function ChatMessage({
+  msg,
+  agent,
+  onClickSender,
+}: {
+  msg: DmMessage;
+  agent: Agent;
+  onClickSender: (senderId: string, e: React.MouseEvent) => void;
+}) {
+  const isUser = msg.from === "user";
+  const userAgent = agents.find((a) => a.id === "1")!;
+  const sender = isUser ? userAgent : agent;
 
   return (
-    <div ref={cardRef} style={{ width, position: "relative" }}>
-      <OrgCard agent={agent} selected={selected} onClick={onSelect} />
-      {show && agent.profile && (
-        <div
-          ref={panelRef}
-          data-profile="true"
-          style={{
-            position: "absolute",
-            top: "100%",
-            left: panelLeft,
-            marginTop: 10,
-            width: panelW,
-            padding: "20px 22px",
-            borderRadius: 16,
-            background: "rgba(255,255,255,0.85)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            border: "1px solid rgba(0,0,0,0.08)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-            zIndex: 50,
-            animation: "profile-fade-in 0.2s ease-out",
-          }}
+    <div className="flex gap-3 px-5 py-2 hover:bg-secondary/20 transition-colors">
+      <button
+        onClick={(e) => onClickSender(sender.id, e)}
+        className="shrink-0 mt-0.5 w-[34px] h-[34px] rounded-full transition-all duration-150 hover:scale-110 hover:shadow-[0_0_0_3px_rgba(128,128,128,0.25)] cursor-pointer"
+      >
+        <Avatar agent={sender} size={34} />
+      </button>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline gap-2">
+          <span className="font-semibold text-[13px] text-foreground">{sender.name}</span>
+          <span className="text-[11px] text-muted-foreground">{msg.timestamp}</span>
+        </div>
+        <p className="text-[13px] text-foreground/80 leading-relaxed">{msg.text}</p>
+      </div>
+    </div>
+  );
+}
+
+function ChatInputBar({ agentName }: { agentName: string }) {
+  return (
+    <div className="px-4 py-3 border-t border-border shrink-0">
+      <div className="flex items-center gap-2 bg-secondary/30 border border-border rounded-lg px-4 py-2.5 opacity-60">
+        <input
+          type="text"
+          placeholder={`Sign in to message ${agentName}...`}
+          className="flex-1 bg-transparent text-[13px] text-foreground placeholder:text-muted-foreground/60 outline-none cursor-not-allowed"
+          disabled
+        />
+        <button className="text-muted-foreground/40 cursor-not-allowed" disabled>
+          <Send className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function EmptyChat() {
+  return (
+    <div className="flex-1 flex items-center justify-center">
+      <div className="text-center text-muted-foreground/40 space-y-2">
+        <p className="text-sm">Select a team member to view conversation</p>
+      </div>
+    </div>
+  );
+}
+
+function ChatPanel({
+  agent,
+  onClickProfile,
+  onClickSender,
+  onBack,
+}: {
+  agent: Agent;
+  onClickProfile: (e: React.MouseEvent) => void;
+  onClickSender: (senderId: string, e: React.MouseEvent) => void;
+  onBack: () => void;
+}) {
+  const messages = dmConversations[agent.id] ?? [];
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [agent.id]);
+
+  return (
+    <div className="flex-1 flex flex-col min-w-0 min-h-0">
+      <ChatHeader agent={agent} onClickProfile={onClickProfile} onBack={onBack} />
+
+      <div ref={scrollRef} className="flex-1 overflow-y-auto py-3 min-h-0">
+        {messages.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-muted-foreground/40 text-sm">
+            No messages yet
+          </div>
+        ) : (
+          messages.map((msg, i) => (
+            <ChatMessage key={i} msg={msg} agent={agent} onClickSender={onClickSender} />
+          ))
+        )}
+      </div>
+
+      <ChatInputBar agentName={agent.name} />
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Profile Popover                                                    */
+/* ------------------------------------------------------------------ */
+
+function ProfilePopover({
+  agent,
+  clickPos,
+  onClose,
+  onMessage,
+}: {
+  agent: Agent;
+  clickPos: { x: number; y: number };
+  onClose: () => void;
+  onMessage: () => void;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    let left = clickPos.x + 8;
+    let top = clickPos.y - 20;
+
+    // Clamp to viewport
+    if (left + rect.width > vw - 12) left = clickPos.x - rect.width - 8;
+    if (left < 12) left = 12;
+    if (top + rect.height > vh - 12) top = vh - rect.height - 12;
+    if (top < 12) top = 12;
+
+    setPos({ top, left });
+  }, [clickPos]);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (cardRef.current && !cardRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [onClose]);
+
+  const { bio, values, skills, tools } = agent.profile ?? {};
+  if (!bio) return null;
+
+  const tagClass =
+    "inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground mr-1.5 mb-1.5";
+
+  return (
+    <div
+      ref={cardRef}
+      className="fixed z-50 bg-background border border-border rounded-xl w-[320px] p-5 shadow-soft-lg"
+      style={{
+        top: pos?.top ?? -9999,
+        left: pos?.left ?? -9999,
+        opacity: pos ? 1 : 0,
+        animation: pos ? "profile-fade-in 0.15s ease-out" : undefined,
+      }}
+    >
+      <button
+        onClick={onClose}
+        className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <X className="w-3.5 h-3.5" />
+      </button>
+
+      <div className="flex items-center gap-3 mb-3">
+        <Avatar agent={agent} size={44} />
+        <div className="min-w-0">
+          <h2 className="font-semibold text-foreground text-[15px] leading-tight">{agent.name}</h2>
+          <p className="text-muted-foreground text-[12px]">{agent.role}</p>
+        </div>
+        <span
+          className={`text-[10px] rounded-full px-2 py-0.5 shrink-0 ${
+            agent.status === "online"
+              ? "text-green-600 bg-green-500/10"
+              : "text-yellow-600 bg-yellow-500/10"
+          }`}
         >
-          <p style={{ fontSize: 13, color: "#333", lineHeight: 1.6, marginBottom: 16 }}>
-            {bio}
-          </p>
-          <div style={{ marginBottom: 12 }}>
-            <div style={labelStyle}>Character & Values</div>
-            <div>{values!.map((v) => <span key={v} style={tagStyle}>{v}</span>)}</div>
-          </div>
-          <div style={{ marginBottom: 12 }}>
-            <div style={labelStyle}>Skills</div>
-            <div>{skills!.map((s) => <span key={s} style={tagStyle}>{s}</span>)}</div>
-          </div>
-          <div>
-            <div style={labelStyle}>Tools</div>
-            <div>{tools!.map((t) => <span key={t} style={tagStyle}>{t}</span>)}</div>
+          {agent.status === "online" ? "online" : "away"}
+        </span>
+      </div>
+
+      <p className="text-foreground/80 text-[13px] leading-relaxed mb-4">{bio}</p>
+
+      <div className="space-y-3">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Values</div>
+          <div className="flex flex-wrap">
+            {values!.map((v) => <span key={v} className={tagClass}>{v}</span>)}
           </div>
         </div>
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Skills</div>
+          <div className="flex flex-wrap">
+            {skills!.map((s) => <span key={s} className={tagClass}>{s}</span>)}
+          </div>
+        </div>
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Tools</div>
+          <div className="flex flex-wrap">
+            {tools!.map((t) => <span key={t} className={tagClass}>{t}</span>)}
+          </div>
+        </div>
+      </div>
+
+      {/* Action button */}
+      {agent.id === "1" ? (
+        <a
+          href="/"
+          className="mt-4 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90 transition-opacity"
+        >
+          <Globe className="w-3.5 h-3.5" />
+          Website
+        </a>
+      ) : (
+        <button
+          onClick={onMessage}
+          className="mt-4 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90 transition-opacity"
+        >
+          <Send className="w-3.5 h-3.5" />
+          Message
+        </button>
       )}
     </div>
   );
@@ -405,196 +720,73 @@ function AgentSlot({
 /* ------------------------------------------------------------------ */
 
 export function OrgChart() {
-  const [expanded, setExpanded] = useState(true);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [activeAgentId, setActiveAgentId] = useState<string | null>(null);
+  const [popover, setPopover] = useState<{
+    agent: Agent;
+    clickPos: { x: number; y: number };
+  } | null>(null);
 
-  const toggleAgent = (id: string) => {
-    setSelectedId((prev) => (prev === id ? null : id));
-  };
+  const activeAgent = activeAgentId
+    ? agents.find((a) => a.id === activeAgentId) ?? null
+    : null;
 
-  // Click outside to dismiss
-  useEffect(() => {
-    if (!selectedId) return;
-    const handlePointerDown = (e: PointerEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest("[data-profile]") || target.closest("[data-card]")) return;
-      setSelectedId(null);
-    };
-    document.addEventListener("pointerdown", handlePointerDown);
-    return () => document.removeEventListener("pointerdown", handlePointerDown);
-  }, [selectedId]);
+  const openProfile = useCallback((id: string, e: React.MouseEvent) => {
+    const agent = agents.find((a) => a.id === id);
+    if (!agent) return;
+    setPopover({ agent, clickPos: { x: e.clientX, y: e.clientY } });
+  }, []);
 
-  const root = agents.find((a) => a.id === "1")!;
-  const reports = agents.filter((a) => a.id !== "1");
+  const openDm = useCallback((id: string) => {
+    setActiveAgentId(id);
+    setPopover(null);
+  }, []);
 
-  // Group reports: grouped agents + ungrouped (standalone)
-  const groupOrder = ["Tech", "Invest", "Content"];
-  const grouped = groupOrder
-    .map((g) => ({
-      label: g === "Tech" ? "Tech" : g === "Invest" ? "Investment" : g,
-      agents: reports.filter((a) => a.group === g),
-    }))
-    .filter((g) => g.agents.length > 0);
-  const ungrouped = reports.filter((a) => !a.group);
+  // On mobile: show sidebar by default, hide when a chat is open
+  const mobileShowChat = activeAgent !== null;
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ background: "#fff" }}
-    >
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "56px 20px 32px", paddingBottom: 400 }}>
-        {/* ─── ROOT CARD ─── */}
-        <div className="flex flex-col items-center">
-          <AgentSlot
-            agent={root}
-            selected={selectedId === root.id}
-            onSelect={() => toggleAgent(root.id)}
-            width={200}
+    <div className="h-dvh bg-background flex flex-col">
+      <div className="flex-1 flex overflow-hidden min-h-0">
+        {/* Sidebar — always on desktop, toggle on mobile */}
+        <div className={`${mobileShowChat ? "hidden" : "flex flex-1"} md:flex md:flex-none h-full`}>
+          <Sidebar
+            activeId={activeAgentId}
+            onSelectDm={(id) => {
+              openDm(id);
+            }}
+            onClickAvatar={(id, e) => {
+              openProfile(id, e);
+            }}
           />
         </div>
 
-        {/* ─── PILL sits on card bottom edge + LINE to bracket ─── */}
-        {reports.length > 0 && (
-          <div className="flex flex-col items-center">
-            {/* Pill overlapping the card's bottom border */}
-            <button
-              onClick={() => setExpanded(!expanded)}
-              style={{
-                marginTop: -13,
-                position: "relative",
-                zIndex: 2,
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-                height: 26,
-                padding: "0 10px",
-                borderRadius: 13,
-                background: expanded ? "#111321" : "#fff",
-                color: expanded ? "#fff" : "#111321",
-                border: expanded
-                  ? "1px solid #111321"
-                  : "1px solid hsl(0,0%,86%)",
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-              }}
-            >
-              {reports.length}
-              {expanded ? (
-                <ChevronUp style={{ width: 12, height: 12 }} />
-              ) : (
-                <ChevronDown style={{ width: 12, height: 12 }} />
-              )}
-            </button>
-            {/* Vertical line from pill to bracket */}
-            {expanded && (
-              <div style={{ width: 1, height: 24, background: "hsl(0,0%,88%)" }} />
-            )}
+        {/* Chat — desktop always, mobile only when agent selected */}
+        {activeAgent ? (
+          <div className={`${mobileShowChat ? "flex" : "hidden"} md:flex flex-1 flex-col min-w-0 min-h-0`}>
+            <ChatPanel
+              key={activeAgent.id}
+              agent={activeAgent}
+              onClickProfile={(e) => openProfile(activeAgent.id, e)}
+              onClickSender={(senderId, e) => openProfile(senderId, e)}
+              onBack={() => setActiveAgentId(null)}
+            />
           </div>
-        )}
-
-        {/* ─── BRACKET (short hooks at ends) + CONTENT ─── */}
-        {expanded && reports.length > 0 && (
-          <>
-            {/* Bracket line: top border with short curved hooks */}
-            <div
-              style={{
-                borderTop: "1px solid hsl(0,0%,86%)",
-                borderLeft: "1px solid hsl(0,0%,86%)",
-                borderRight: "1px solid hsl(0,0%,86%)",
-                borderTopLeftRadius: 12,
-                borderTopRightRadius: 12,
-                height: 36,
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-end",
-                padding: "0 14px 6px",
-              }}
-            >
-              <div />
-
-              <button
-                onClick={() => setExpanded(false)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 4,
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: 13,
-                  color: "#6F7179",
-                  fontWeight: 500,
-                  padding: 0,
-                }}
-              >
-                Collapse
-                <ChevronUp style={{ width: 14, height: 14 }} />
-              </button>
-            </div>
-
-            {/* Reports — grouped */}
-            <div
-              style={{
-                padding: "12px 14px 0",
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 16,
-                justifyContent: "center",
-              }}
-            >
-              {grouped.map((group) => (
-                <div
-                  key={group.label}
-                  style={{
-                    border: "1px dashed hsl(0,0%,85%)",
-                    borderRadius: 14,
-                    padding: "10px 12px 14px",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 600,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.06em",
-                      color: "#9a9ba0",
-                      marginBottom: 10,
-                      paddingLeft: 4,
-                    }}
-                  >
-                    {group.label}
-                  </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
-                    {group.agents.map((agent) => (
-                      <AgentSlot
-                        key={agent.id}
-                        agent={agent}
-                        selected={selectedId === agent.id}
-                        onSelect={() => toggleAgent(agent.id)}
-                        width={140}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
-
-              {/* Ungrouped agents (e.g. Assistant) */}
-              {ungrouped.map((agent) => (
-                <AgentSlot
-                  key={agent.id}
-                  agent={agent}
-                  selected={selectedId === agent.id}
-                  onSelect={() => toggleAgent(agent.id)}
-                  width={160}
-                />
-              ))}
-            </div>
-          </>
+        ) : (
+          <div className="hidden md:flex flex-1 flex-col min-w-0 min-h-0">
+            <EmptyChat />
+          </div>
         )}
       </div>
 
+      {/* Profile Popover */}
+      {popover && (
+        <ProfilePopover
+          agent={popover.agent}
+          clickPos={popover.clickPos}
+          onClose={() => setPopover(null)}
+          onMessage={() => openDm(popover.agent.id)}
+        />
+      )}
     </div>
   );
 }
