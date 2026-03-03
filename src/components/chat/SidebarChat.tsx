@@ -6,27 +6,33 @@ import { DefaultChatTransport } from "ai";
 import { ChatBubble } from "./ChatBubble";
 import { ChatInput } from "./ChatInput";
 
+const WELCOME = "Hey! 👋 I'm Tim. Ask me anything - about my work, tech opinions, or career advice!";
+
 export function SidebarChat() {
   const [inputValue, setInputValue] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [typedText, setTypedText] = useState("");
+  const [isTyping, setIsTyping] = useState(true);
 
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
     }),
-    messages: [
-      {
-        id: "welcome",
-        role: "assistant",
-        parts: [
-          {
-            type: "text",
-            text: "Hey! 👋 I'm Tim. Ask me anything - about my work, tech opinions, or career advice!",
-          },
-        ],
-      },
-    ],
   });
+
+  // Typewriter effect for welcome message
+  useEffect(() => {
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setTypedText(WELCOME.slice(0, i));
+      if (i >= WELCOME.length) {
+        clearInterval(interval);
+        setIsTyping(false);
+      }
+    }, 30);
+    return () => clearInterval(interval);
+  }, []);
 
   const isLoading = status === "streaming" || status === "submitted";
 
@@ -34,7 +40,7 @@ export function SidebarChat() {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, isLoading]);
+  }, [messages, isLoading, typedText]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -60,6 +66,14 @@ export function SidebarChat() {
         className="flex-1 overflow-y-auto p-4 min-h-0"
       >
         <div className="space-y-1">
+          {/* Welcome message with typewriter */}
+          {typedText && (
+            <ChatBubble
+              content={typedText}
+              role="assistant"
+              isStreaming={isTyping}
+            />
+          )}
           {messages.map((message, index) => {
             const textContent = message.parts
               .filter(

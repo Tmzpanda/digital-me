@@ -276,6 +276,191 @@
   }
 }
 
+/* ── Blog: Newsreader font faces ── */
+
+@font-face {
+  font-family: "Newsreader 24 Pt";
+  src: url("/fonts/Newsreader24pt-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Newsreader 24 Pt";
+  src: url("/fonts/Newsreader24pt-Italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Newsreader 24 Pt";
+  src: url("/fonts/Newsreader24pt-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Newsreader 24 Pt";
+  src: url("/fonts/Newsreader24pt-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Newsreader 24 Pt";
+  src: url("/fonts/Newsreader24pt-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Newsreader Display";
+  src: url("/fonts/NewsreaderDisplay-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Newsreader Display";
+  src: url("/fonts/NewsreaderDisplay-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Blog: wrapper with scoped CSS variables ── */
+
+.blog-theme {
+  /* Light mode vars (match main site background) */
+  --blog-bg: oklch(0.985 0.002 90);
+  --blog-text: #171d26;
+  --blog-text-secondary: #5e636c;
+  --blog-border: #e5e4e0;
+  --blog-text-link-hover: #5e636c;
+  --blog-toggle-bg: #f2f1ee;
+
+  background-color: var(--blog-bg);
+  color: var(--blog-text);
+  font-family: "Newsreader 24 Pt", "LXGW WenKai", "Times New Roman", serif;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Blog dark mode — scoped to blog wrapper only, never affects main site */
+.blog-theme[data-blog-theme="dark"] {
+  --blog-bg: #0a0a0a;
+  --blog-text: #f9f9f9;
+  --blog-text-secondary: #a0a0a0;
+  --blog-border: rgba(255, 255, 255, 0.1);
+  --blog-text-link-hover: #a0a0a0;
+  --blog-toggle-bg: #171717;
+}
+
+/* ── Blog: Prose styles ── */
+
+.blog-theme .prose {
+  --tw-prose-body: var(--blog-text);
+  --tw-prose-headings: var(--blog-text);
+  --tw-prose-links: var(--blog-text);
+  --tw-prose-bold: var(--blog-text);
+  --tw-prose-quotes: var(--blog-text);
+  --tw-prose-quote-borders: var(--blog-border);
+  --tw-prose-counters: var(--blog-text-secondary);
+  --tw-prose-bullets: var(--blog-text-secondary);
+  --tw-prose-hr: var(--blog-border);
+  --tw-prose-code: var(--blog-text);
+  --tw-prose-pre-bg: color-mix(in srgb, var(--blog-text) 10%, var(--blog-bg));
+  --tw-prose-pre-code: var(--blog-text);
+  font-family: "Newsreader 24 Pt", "LXGW WenKai", "Times New Roman", serif;
+  font-size: 1.25rem;
+  line-height: 1.6;
+}
+
+.blog-theme .prose :where(p):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.blog-theme .prose :where(h2):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  font-family: "Newsreader 24 Pt", "LXGW WenKai", "Times New Roman", serif;
+  font-size: 1.6em;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0em;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.blog-theme .prose :where(h3):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  font-family: "Newsreader 24 Pt", "LXGW WenKai", "Times New Roman", serif;
+  font-size: 1.2em;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0em;
+  margin-top: 1em;
+  margin-bottom: 0.7em;
+}
+
+.blog-theme .prose :where(blockquote):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  border-left: 1px solid var(--blog-border);
+  padding: 0.25em 0 0.1em 1.25em;
+  margin-top: 2em;
+  margin-bottom: 2em;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1em;
+  line-height: 1.5em;
+  quotes: none;
+}
+
+.blog-theme .prose :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+
+.blog-theme .prose :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)):hover {
+  color: var(--blog-text-link-hover);
+}
+
+.blog-theme .prose :where(ol, ul):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  padding-left: 2em;
+  overflow: visible;
+}
+
+.blog-theme .prose :where(code):not(:where(pre *, [class~="not-prose"], [class~="not-prose"] *)) {
+  background-color: color-mix(in srgb, var(--blog-text) 10%, var(--blog-bg));
+  border: 1px solid color-mix(in srgb, var(--blog-text) 30%, var(--blog-bg));
+  border-radius: 4px;
+  padding-left: 0.4em;
+  padding-right: 0.4em;
+  font-size: 0.9em;
+}
+
+.blog-theme .prose :where(figure):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  margin-top: 4rem;
+  margin-bottom: 4rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.blog-theme .prose :where(figcaption):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  margin-top: 1em;
+  font-size: 0.9em;
+  color: color-mix(in srgb, var(--blog-text) 50%, var(--blog-bg));
+}
+
+.blog-theme .prose :where(img):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.blog-theme .prose :where(hr):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  border-color: var(--blog-border);
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
 /* Avatar easter egg keyframes */
 @keyframes avatar-bounce {
   0% {
@@ -291,6 +476,7 @@
     transform: scale(1);
   }
 }
+
 
 @keyframes profile-fade-in {
   from {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useRef } from "react";
-import Image from "next/image";
 import confetti from "canvas-confetti";
 
 export function AvatarEasterEgg({
@@ -17,12 +16,10 @@ export function AvatarEasterEgg({
     const el = buttonRef.current;
     if (!el) return;
 
-    // Calculate avatar center position as ratio of viewport
     const rect = el.getBoundingClientRect();
     const x = (rect.left + rect.width / 2) / window.innerWidth;
     const y = (rect.top + rect.height / 2) / window.innerHeight;
 
-    // Burst 1: main confetti explosion
     confetti({
       particleCount: 80,
       spread: 360,
@@ -35,7 +32,6 @@ export function AvatarEasterEgg({
       scalar: 0.9,
     });
 
-    // Burst 2: slower sparkle follow-up
     setTimeout(() => {
       confetti({
         particleCount: 30,
@@ -50,9 +46,8 @@ export function AvatarEasterEgg({
       });
     }, 150);
 
-    // Avatar bounce
     el.style.animation = "none";
-    el.offsetHeight; // reflow
+    el.offsetHeight;
     el.style.animation = "avatar-bounce 0.5s cubic-bezier(0.34,1.56,0.64,1)";
   }, []);
 
@@ -61,18 +56,15 @@ export function AvatarEasterEgg({
       ref={buttonRef}
       type="button"
       onClick={handleClick}
-      className="avatar-glow relative mb-12 inline-block group"
+      className="relative mb-12 inline-block cursor-pointer"
       aria-label="Easter egg animation"
     >
-      <div className="w-40 h-40 rounded-full overflow-hidden border-2 border-border/50 shadow-soft-lg ring-4 ring-background">
-        <Image
+      <div className="w-40 h-40 rounded-full overflow-hidden border-2 border-border/50">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={profileImage}
           alt={name}
-          width={320}
-          height={320}
-          quality={95}
           className="w-full h-full object-cover"
-          priority
         />
       </div>
     </button>

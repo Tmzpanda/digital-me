@@ -1,7 +1,6 @@
 "use client";
 
 import { SidebarChat } from "@/components/chat/SidebarChat";
-import Image from "next/image";
 import Link from "next/link";
 
 // ============================================
@@ -62,16 +61,13 @@ export default function WorkPage() {
           {/* Left Side - Profile & Links */}
           <div className="flex flex-col items-center text-center lg:items-center lg:text-center">
             {/* Profile Photo */}
-            <Link href="/" className="avatar-glow relative mb-6 group">
-              <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-border/50 shadow-soft-lg ring-4 ring-background transition-transform duration-200 group-hover:scale-105">
-                <Image
+            <Link href="/" className="relative mb-6 group">
+              <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-border/50">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={personalInfo.profileImage}
                   alt={personalInfo.name}
-                  width={224}
-                  height={224}
-                  quality={95}
                   className="w-full h-full object-cover"
-                  priority
                 />
               </div>
             </Link>
