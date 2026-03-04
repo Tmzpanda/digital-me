@@ -30,7 +30,7 @@ export function SidebarChat() {
         clearInterval(interval);
         setIsTyping(false);
       }
-    }, 30);
+    }, 15);
     return () => clearInterval(interval);
   }, []);
 

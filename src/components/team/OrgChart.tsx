@@ -1,229 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { ChevronRight, ChevronDown, X, Send, MessageSquare, Globe } from "lucide-react";
-
-/* ------------------------------------------------------------------ */
-/*  Types & Data                                                       */
-/* ------------------------------------------------------------------ */
-
-interface AgentProfile {
-  bio: string;
-  values: string[];
-  skills: string[];
-  tools: string[];
-}
-
-interface Agent {
-  id: string;
-  name: string;
-  role: string;
-  icon: string;
-  avatar_url: string | null;
-  group: string | null;
-  status: "online" | "away";
-  profile?: AgentProfile;
-}
-
-interface DmMessage {
-  from: "user" | "agent";
-  timestamp: string;
-  text: string;
-}
-
-const agents: Agent[] = [
-  {
-    id: "1",
-    name: "Tim",
-    role: "Agent Whisperer",
-    icon: "\uD83D\uDC64",
-    avatar_url: "/images/profile.jpg",
-    group: null,
-    status: "away",
-    profile: {
-      bio: "Technically the boss. Mostly delegates everything to agents and takes credit. Currently away — probably napping or pretending to review PRs.",
-      values: ["Do less, delegate more", "Naps are productive", "If it works, don't touch it"],
-      skills: ["Agent whispering", "Strategic napping", "Approving things I didn't read", "Taking credit"],
-      tools: ["Claude Code (it does the work)", "Coffee", "A comfy chair"],
-    },
-  },
-  {
-    id: "2",
-    name: "Steve",
-    role: "Product & Design",
-    icon: "\uD83C\uDFA8",
-    avatar_url: "/images/steve.jpg",
-    group: "Tech",
-    status: "online",
-    profile: {
-      bio: "The one who decides what gets built and how it looks. Turns vague ideas into pixel-perfect interfaces.",
-      values: ["Users first, pixels second", "Less but better", "If it's ugly, it's wrong"],
-      skills: ["Product strategy", "UI/UX design", "Prototyping", "Design systems"],
-      tools: ["Figma", "Framer", "Pencil", "Linear"],
-    },
-  },
-  {
-    id: "3",
-    name: "Peter",
-    role: "Software Engineer",
-    icon: "\u2699\uFE0F",
-    avatar_url: null,
-    group: "Tech",
-    status: "online",
-    profile: {
-      bio: "The one who actually builds it. Takes Steve's pretty mockups and turns them into working code.",
-      values: ["Ship it, then polish", "Clean code is kind code", "If it compiles, it ships"],
-      skills: ["Full-stack development", "System architecture", "API design", "Performance optimization"],
-      tools: ["Claude Code", "Python", "TypeScript", "Next.js"],
-    },
-  },
-  {
-    id: "9",
-    name: "Tristan",
-    role: "Data",
-    icon: "\uD83D\uDCCA",
-    avatar_url: null,
-    group: "Tech",
-    status: "online",
-    profile: {
-      bio: "Makes sure everyone has the numbers they need. Pipes data from everywhere, cleans it up, and serves it on a silver platter so decisions aren't just vibes.",
-      values: ["Bad data, bad decisions", "Automate the boring stuff", "Dashboards don't lie"],
-      skills: ["Data engineering", "Analytics", "Visualization"],
-      tools: ["Python", "SQL", "dbt", "Metabase"],
-    },
-  },
-  {
-    id: "4",
-    name: "Warren",
-    role: "Stock",
-    icon: "\uD83D\uDCCA",
-    avatar_url: "/images/warren.jpg",
-    group: "Invest",
-    status: "online",
-    profile: {
-      bio: "Buys great businesses at fair prices, then does absolutely nothing. Believes the stock market is a device for transferring money from the impatient to the patient.",
-      values: ["Buy and hold forever", "Margin of safety", "Be greedy when others are fearful"],
-      skills: ["Fundamental analysis", "Financial modeling", "Earnings deep-dives", "Intrinsic value estimation"],
-      tools: ["SEC filings", "10-K reports", "Excel", "A very long attention span"],
-    },
-  },
-  {
-    id: "5",
-    name: "Jim",
-    role: "Quant",
-    icon: "\uD83D\uDCCA",
-    avatar_url: "/images/jim.jpg",
-    group: "Invest",
-    status: "online",
-    profile: {
-      bio: "Doesn't care what the company does — only what the numbers say. Builds algorithms that trade while everyone else is sleeping. Emotions are a bug, not a feature.",
-      values: ["Data over gut feeling", "Backtest everything", "The model is always right (until it isn't)"],
-      skills: ["Quantitative modeling", "Statistical arbitrage", "Backtesting", "Signal extraction"],
-      tools: ["Python", "QuantLib", "Jupyter", "Way too many monitors"],
-    },
-  },
-  {
-    id: "6",
-    name: "Justin",
-    role: "Crypto",
-    icon: "\uD83E\uDE99",
-    avatar_url: "/images/justin.jpg",
-    group: "Invest",
-    status: "online",
-    profile: {
-      bio: "Lives on-chain. Finds alpha in DeFi protocols before they trend on Twitter. Has survived three bear markets and still believes in the tech.",
-      values: ["Verify, don't trust", "Asymmetric bets only", "If you can't read the contract, don't ape in"],
-      skills: ["On-chain analysis", "DeFi yield strategies", "Tokenomics evaluation", "Market timing"],
-      tools: ["Dune Analytics", "Etherscan", "DeFiLlama", "A high risk tolerance"],
-    },
-  },
-  {
-    id: "7",
-    name: "Christopher",
-    role: "Director & AIGC",
-    icon: "\uD83C\uDFAC",
-    avatar_url: "/images/chris.jpg",
-    group: "Content",
-    status: "online",
-    profile: {
-      bio: "Part director, part prompt whisperer. Creates cinematic visuals and videos using AI tools that didn't exist six months ago. Treats every frame like it's going to Cannes.",
-      values: ["Every frame tells a story", "AI is the brush, not the artist", "Ship fast, iterate faster"],
-      skills: ["AI image generation", "Video production", "Visual direction", "Prompt engineering"],
-      tools: ["Midjourney", "Runway", "ComfyUI", "After Effects"],
-    },
-  },
-  {
-    id: "8",
-    name: "Kevin",
-    role: "Writer",
-    icon: "\uD83D\uDCDD",
-    avatar_url: null,
-    group: "Content",
-    status: "online",
-    profile: {
-      bio: "Takes Tim's half-baked thoughts and turns them into prose that sounds like Tim actually knows what he's talking about. Ghost-writing with dignity.",
-      values: ["Clarity beats cleverness", "Every word earns its place", "Good writing is rewriting"],
-      skills: ["Long-form writing", "Copyediting", "Ghostwriting", "Turning rambles into essays"],
-      tools: ["Notion", "Claude", "Grammarly", "A red pen"],
-    },
-  },
-];
-
-/* ------------------------------------------------------------------ */
-/*  DM Conversations                                                   */
-/* ------------------------------------------------------------------ */
-
-const dmConversations: Record<string, DmMessage[]> = {
-  "2": [
-    { from: "user", timestamp: "Mon 9:00 AM", text: "Steve, I need you to redesign the team page. Slack-style layout — sidebar with members, click to open DM chat." },
-    { from: "agent", timestamp: "Mon 9:05 AM", text: "Got it. I'll sketch out wireframes first — sidebar tree + chat panel + profile popover. Give me a couple hours." },
-    { from: "agent", timestamp: "Mon 11:30 AM", text: "Progress update: wireframes done. Going with 260px sidebar, flat message list, and a compact profile card. Starting hi-fi mockups now." },
-    { from: "user", timestamp: "Mon 11:35 AM", text: "Looks good. Make sure it works well on mobile too — collapsible sidebar." },
-    { from: "agent", timestamp: "Mon 3:00 PM", text: "Done. Mobile breakpoint at md — sidebar collapses to a toggle. All screens exported to Figma. Ready for dev handoff." },
-  ],
-  "3": [
-    { from: "user", timestamp: "Tue 10:00 AM", text: "Peter, set up the API endpoints for the agent chat system. Need send/receive message routes and a task assignment endpoint." },
-    { from: "agent", timestamp: "Tue 10:10 AM", text: "On it. I'll use Next.js API routes with a simple in-memory store for now. Schema: messages, tasks, agent assignments." },
-    { from: "agent", timestamp: "Tue 2:00 PM", text: "Midday update: POST /api/messages and GET /api/messages/:agentId are live in staging. Working on the task assignment endpoint next." },
-    { from: "agent", timestamp: "Tue 5:30 PM", text: "All endpoints done and tested. POST /api/tasks for assignments, GET /api/tasks/:agentId for status. Deployed to staging." },
-  ],
-  "9": [
-    { from: "user", timestamp: "Wed 9:00 AM", text: "Tristan, I need a dashboard showing agent task completion rates and response times. Pull data from the tasks API." },
-    { from: "agent", timestamp: "Wed 9:15 AM", text: "Got it. I'll build a pipeline: tasks API → aggregation → daily metrics. Will have a prototype by EOD." },
-    { from: "agent", timestamp: "Wed 4:00 PM", text: "Progress: pipeline running. Average task completion: 94%. Response time P50: 12min, P95: 45min. Dashboard draft ready for review." },
-  ],
-  "4": [
-    { from: "user", timestamp: "Thu 8:30 AM", text: "Warren, analyze the latest Q4 earnings. Focus on undervalued industrials — I want a shortlist of 5 names with your conviction level." },
-    { from: "agent", timestamp: "Thu 8:45 AM", text: "Starting the screen now. Filtering for P/E below sector average, positive earnings surprise, and strong free cash flow." },
-    { from: "agent", timestamp: "Thu 12:00 PM", text: "Shortlist ready: CAT, EMR, ITW, PH, ROK. All trading below intrinsic value with 15-25% margin of safety. Full report attached." },
-    { from: "user", timestamp: "Thu 12:10 PM", text: "Great work. Add position sizing recommendations based on our current portfolio allocation." },
-    { from: "agent", timestamp: "Thu 2:00 PM", text: "Done. Recommended 2-3% allocation each, keeping total industrials exposure under 15%. Updated the portfolio model." },
-  ],
-  "5": [
-    { from: "user", timestamp: "Fri 9:00 AM", text: "Jim, run a backtest on the new multi-factor model. 10-year window, monthly rebalance. Compare against SPY benchmark." },
-    { from: "agent", timestamp: "Fri 9:20 AM", text: "Running now. Factors: value, momentum, quality, low-vol. Will have results in about 2 hours." },
-    { from: "agent", timestamp: "Fri 11:30 AM", text: "Backtest complete. CAGR 14.2% vs SPY 10.8%. Sharpe 1.31 vs 0.82. Max drawdown -18% vs -34%. Full tear sheet ready." },
-  ],
-  "6": [
-    { from: "user", timestamp: "Sat 10:00 AM", text: "Justin, monitor the L2 ecosystem this week. Flag any unusual on-chain activity or TVL shifts above 10%." },
-    { from: "agent", timestamp: "Sat 10:15 AM", text: "Setting up alerts now. Watching Arbitrum, Optimism, Base, and zkSync. Will send daily summaries." },
-    { from: "agent", timestamp: "Sun 9:00 AM", text: "Daily report: Base TVL up 12% — driven by a new DEX launch. Arbitrum stable. No red flags on security front. Gas fees remain low." },
-    { from: "agent", timestamp: "Mon 9:00 AM", text: "Weekly wrap: Base was the big mover (+18% TVL). Spotted an early DeFi protocol worth watching — solid team, audited contracts. Sending detailed analysis." },
-  ],
-  "7": [
-    { from: "user", timestamp: "Tue 1:00 PM", text: "Christopher, create visual assets for the new blog post: hero image, 3 inline illustrations, and social cards for Twitter/LinkedIn." },
-    { from: "agent", timestamp: "Tue 1:15 PM", text: "On it. Going with a clean, modern style — muted tones, subtle gradients. Hero image will feature an abstract team/network visual." },
-    { from: "agent", timestamp: "Tue 4:00 PM", text: "Hero image and 2 illustrations done. Working on the last illustration and social cards now. Preview shared in the assets folder." },
-    { from: "agent", timestamp: "Tue 6:00 PM", text: "All assets delivered. Hero: 1200x630, illustrations: 800x450, social cards: Twitter 1200x675 + LinkedIn 1200x627. All in /assets/blog/." },
-  ],
-  "8": [
-    { from: "user", timestamp: "Wed 10:00 AM", text: "Kevin, write a blog post: 'Building an AI Agent Team from Scratch.' Target 1500 words. Tone: practical, conversational, first-person." },
-    { from: "agent", timestamp: "Wed 10:20 AM", text: "Great topic. I'll structure it as: why agents, the team design, lessons learned, what's next. First draft by 3pm." },
-    { from: "agent", timestamp: "Wed 3:00 PM", text: "Draft done — 1,480 words. Strong hook, clean narrative arc. A few spots could use your voice. Ready for review in /content/blog/." },
-    { from: "user", timestamp: "Wed 3:30 PM", text: "Nice work. Tighten the intro — lead with the hook, cut the setup. And add a section on what surprised me." },
-    { from: "agent", timestamp: "Wed 5:00 PM", text: "Revised. Intro is now 40% shorter, leads with the provocation. Added 'Surprises' section before the conclusion. Final at 1,520 words." },
-  ],
-};
+import { ChevronRight, ChevronDown, X, Send, MessageSquare, Globe, LogOut } from "lucide-react";
+import { agents, dmConversations } from "@/data/agents";
+import type { Agent, DmMessage } from "@/data/agents";
+import { AgentChatPanel } from "./AgentChatPanel";
+import { PublicSummaryPanel } from "./PublicSummaryPanel";
+import { LoginModal } from "./LoginModal";
 
 /* ------------------------------------------------------------------ */
 /*  Avatar                                                             */
@@ -362,7 +145,6 @@ function TeamSubGroup({
           <ChevronRight className="w-3.5 md:w-3 h-3.5 md:h-3 shrink-0" />
         )}
         <span>{label}</span>
-        <span className="text-[13px] md:text-[12px] text-muted-foreground/50 ml-auto">{groupAgents.length}</span>
       </button>
       {open && (
         <div className="ml-5 md:ml-4">
@@ -385,10 +167,16 @@ function Sidebar({
   activeId,
   onSelectDm,
   onClickAvatar,
+  isAuthed,
+  onLoginClick,
+  onLogout,
 }: {
   activeId: string | null;
   onSelectDm: (id: string) => void;
   onClickAvatar: (id: string, e: React.MouseEvent) => void;
+  isAuthed: boolean;
+  onLoginClick: () => void;
+  onLogout: () => void;
 }) {
   return (
     <div className="bg-background md:bg-secondary/30 md:border-r md:border-border flex flex-col shrink-0 h-full w-full md:w-[320px] md:min-w-[320px]">
@@ -426,12 +214,32 @@ function Sidebar({
           })}
         </SidebarSection>
       </div>
+
+      {/* Auth footer */}
+      <div className="px-5 py-3 border-t border-border shrink-0">
+        {isAuthed ? (
+          <button
+            onClick={onLogout}
+            className="flex items-center gap-2 text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            Sign out
+          </button>
+        ) : (
+          <button
+            onClick={onLoginClick}
+            className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Owner sign in
+          </button>
+        )}
+      </div>
     </div>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/*  Chat Panel                                                         */
+/*  Chat Panel (demo view for public / Tim's own row)                  */
 /* ------------------------------------------------------------------ */
 
 function ChatHeader({
@@ -445,7 +253,6 @@ function ChatHeader({
 }) {
   return (
     <div className="flex items-center gap-3 px-5 py-3 border-b border-border shrink-0">
-      {/* Back button — mobile only */}
       <button
         onClick={onBack}
         className="md:hidden shrink-0 text-muted-foreground hover:text-foreground transition-colors -ml-1 mr--1"
@@ -506,24 +313,6 @@ function ChatMessage({
   );
 }
 
-function ChatInputBar({ agentName }: { agentName: string }) {
-  return (
-    <div className="px-4 py-3 border-t border-border shrink-0">
-      <div className="flex items-center gap-2 bg-secondary/30 border border-border rounded-lg px-4 py-2.5 opacity-60">
-        <input
-          type="text"
-          placeholder={`Sign in to message ${agentName}...`}
-          className="flex-1 bg-transparent text-[13px] text-foreground placeholder:text-muted-foreground/60 outline-none cursor-not-allowed"
-          disabled
-        />
-        <button className="text-muted-foreground/40 cursor-not-allowed" disabled>
-          <Send className="w-4 h-4" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function EmptyChat() {
   return (
     <div className="flex-1 flex items-center justify-center">
@@ -570,7 +359,19 @@ function ChatPanel({
         )}
       </div>
 
-      <ChatInputBar agentName={agent.name} />
+      <div className="px-4 py-3 border-t border-border shrink-0">
+        <div className="flex items-center gap-2 bg-secondary/30 border border-border rounded-lg px-4 py-2.5 opacity-60">
+          <input
+            type="text"
+            placeholder={`Sign in to message ${agent.name}...`}
+            className="flex-1 bg-transparent text-[13px] text-foreground placeholder:text-muted-foreground/60 outline-none cursor-not-allowed"
+            disabled
+          />
+          <button className="text-muted-foreground/40 cursor-not-allowed" disabled>
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -603,7 +404,6 @@ function ProfilePopover({
     let left = clickPos.x + 8;
     let top = clickPos.y - 20;
 
-    // Clamp to viewport
     if (left + rect.width > vw - 12) left = clickPos.x - rect.width - 8;
     if (left < 12) left = 12;
     if (top + rect.height > vh - 12) top = vh - rect.height - 12;
@@ -666,7 +466,7 @@ function ProfilePopover({
               : "text-yellow-600 bg-yellow-500/10"
           }`}
         >
-          {agent.status === "online" ? "online" : "away"}
+          {agent.status === "online" ? "Online" : "Away"}
         </span>
       </div>
 
@@ -693,7 +493,6 @@ function ProfilePopover({
         </div>
       </div>
 
-      {/* Action button */}
       {agent.id === "1" ? (
         <a
           href="/"
@@ -725,6 +524,22 @@ export function OrgChart() {
     agent: Agent;
     clickPos: { x: number; y: number };
   } | null>(null);
+  const [isAuthed, setIsAuthed] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  // Check auth status on mount
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/auth/status");
+        const data = await res.json();
+        setIsAuthed(data.authenticated);
+      } catch {
+        // Not authenticated
+      }
+    }
+    checkAuth();
+  }, []);
 
   const activeAgent = activeAgentId
     ? agents.find((a) => a.id === activeAgentId) ?? null
@@ -741,35 +556,57 @@ export function OrgChart() {
     setPopover(null);
   }, []);
 
-  // On mobile: show sidebar by default, hide when a chat is open
+  const handleLogout = useCallback(async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setIsAuthed(false);
+    } catch {
+      // Ignore
+    }
+  }, []);
+
   const mobileShowChat = activeAgent !== null;
 
   return (
     <div className="h-dvh bg-background flex flex-col">
       <div className="flex-1 flex overflow-hidden min-h-0">
-        {/* Sidebar — always on desktop, toggle on mobile */}
+        {/* Sidebar */}
         <div className={`${mobileShowChat ? "hidden" : "flex flex-1"} md:flex md:flex-none h-full`}>
           <Sidebar
             activeId={activeAgentId}
-            onSelectDm={(id) => {
-              openDm(id);
-            }}
-            onClickAvatar={(id, e) => {
-              openProfile(id, e);
-            }}
+            onSelectDm={openDm}
+            onClickAvatar={openProfile}
+            isAuthed={isAuthed}
+            onLoginClick={() => setShowLoginModal(true)}
+            onLogout={handleLogout}
           />
         </div>
 
-        {/* Chat — desktop always, mobile only when agent selected */}
+        {/* Chat area — conditional on auth */}
         {activeAgent ? (
           <div className={`${mobileShowChat ? "flex" : "hidden"} md:flex flex-1 flex-col min-w-0 min-h-0`}>
-            <ChatPanel
-              key={activeAgent.id}
-              agent={activeAgent}
-              onClickProfile={(e) => openProfile(activeAgent.id, e)}
-              onClickSender={(senderId, e) => openProfile(senderId, e)}
-              onBack={() => setActiveAgentId(null)}
-            />
+            {isAuthed && activeAgent.id !== "1" ? (
+              <AgentChatPanel
+                key={activeAgent.id}
+                agent={activeAgent}
+                onBack={() => setActiveAgentId(null)}
+              />
+            ) : isAuthed && activeAgent.id === "1" ? (
+              <ChatPanel
+                key={activeAgent.id}
+                agent={activeAgent}
+                onClickProfile={(e) => openProfile(activeAgent.id, e)}
+                onClickSender={(senderId, e) => openProfile(senderId, e)}
+                onBack={() => setActiveAgentId(null)}
+              />
+            ) : (
+              <PublicSummaryPanel
+                key={activeAgent.id}
+                agent={activeAgent}
+                onBack={() => setActiveAgentId(null)}
+                onLoginClick={() => setShowLoginModal(true)}
+              />
+            )}
           </div>
         ) : (
           <div className="hidden md:flex flex-1 flex-col min-w-0 min-h-0">
@@ -785,6 +622,17 @@ export function OrgChart() {
           clickPos={popover.clickPos}
           onClose={() => setPopover(null)}
           onMessage={() => openDm(popover.agent.id)}
+        />
+      )}
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <LoginModal
+          onSuccess={() => {
+            setShowLoginModal(false);
+            setIsAuthed(true);
+          }}
+          onClose={() => setShowLoginModal(false)}
         />
       )}
     </div>
