@@ -11,7 +11,7 @@ const name: Record<Locale, string> = {
 };
 
 const messageLinkClass =
-  "rounded-[4px] bg-[linear-gradient(180deg,transparent_54%,rgba(43,43,43,0.10)_54%)] underline decoration-2 underline-offset-[0.18em] decoration-foreground/45 transition-colors hover:bg-[linear-gradient(180deg,transparent_42%,rgba(43,43,43,0.16)_42%)] hover:decoration-foreground";
+  "rounded-[4px] bg-[linear-gradient(180deg,transparent_54%,rgba(43,43,43,0.10)_54%)] underline underline-offset-[0.18em] decoration-foreground/45 transition-colors hover:bg-[linear-gradient(180deg,transparent_42%,rgba(43,43,43,0.16)_42%)] hover:decoration-foreground active:bg-[linear-gradient(180deg,transparent_42%,rgba(43,43,43,0.18)_42%)]";
 
 const profileInfo = {
   tagline: "Build. Think. Compound.",
