@@ -6,13 +6,26 @@ import { DefaultChatTransport } from "ai";
 import { ChatBubble } from "./ChatBubble";
 import { ChatInput } from "./ChatInput";
 
-const WELCOME = "Hey! 👋 I'm Tim. Ask me anything - about my work, tech opinions, or career advice!";
+type Locale = "en" | "zh";
 
-export function SidebarChat() {
+const copy: Record<Locale, { welcome: string; placeholder: string }> = {
+  en: {
+    welcome:
+      "Hey! 👋 I'm Tim. Ask me anything - about my work, tech opinions, or career advice!",
+    placeholder: "Ask me anything...",
+  },
+  zh: {
+    welcome: "你好！👋 我是 Tim。你可以问我关于工作经历、技术观点或职业发展的任何问题。",
+    placeholder: "问我任何问题...",
+  },
+};
+
+export function SidebarChat({ locale = "en" }: { locale?: Locale }) {
   const [inputValue, setInputValue] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const [typedText, setTypedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
+  const activeCopy = copy[locale];
 
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
@@ -23,16 +36,18 @@ export function SidebarChat() {
   // Typewriter effect for welcome message
   useEffect(() => {
     let i = 0;
+    setTypedText("");
+    setIsTyping(true);
     const interval = setInterval(() => {
       i++;
-      setTypedText(WELCOME.slice(0, i));
-      if (i >= WELCOME.length) {
+      setTypedText(activeCopy.welcome.slice(0, i));
+      if (i >= activeCopy.welcome.length) {
         clearInterval(interval);
         setIsTyping(false);
       }
     }, 15);
     return () => clearInterval(interval);
-  }, []);
+  }, [activeCopy.welcome]);
 
   const isLoading = status === "streaming" || status === "submitted";
 
@@ -118,7 +133,7 @@ export function SidebarChat() {
           onChange={setInputValue}
           onSubmit={handleSubmit}
           isLoading={isLoading}
-          placeholder="Ask me anything..."
+          placeholder={activeCopy.placeholder}
         />
       </div>
     </div>

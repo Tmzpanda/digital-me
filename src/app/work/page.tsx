@@ -2,6 +2,9 @@
 
 import { SidebarChat } from "@/components/chat/SidebarChat";
 import Link from "next/link";
+import { useState } from "react";
+
+type Locale = "en" | "zh";
 
 // ============================================
 // CUSTOMIZE YOUR INFO HERE
@@ -53,9 +56,38 @@ const actionLinks = [
 ];
 
 export default function WorkPage() {
+  const [locale, setLocale] = useState<Locale>("en");
+
+  const toggleLocale = () => {
+    setLocale((current) => (current === "en" ? "zh" : "en"));
+  };
+
   return (
     <div className="min-h-screen bg-background relative flex items-center justify-center p-4 lg:p-8">
       <div className="w-full max-w-5xl mx-auto relative">
+        <button
+          type="button"
+          onClick={toggleLocale}
+          aria-label="Switch language"
+          aria-pressed={locale === "zh"}
+          className="fixed right-4 top-4 z-10 ml-auto flex w-fit gap-0.5 rounded-full border border-border bg-card/90 p-1 text-xs font-bold text-muted-foreground shadow-[0_6px_22px_rgba(0,0,0,0.06)] backdrop-blur max-[1023px]:static max-[1023px]:mb-8 sm:right-6 sm:top-6"
+        >
+          <span
+            className={`min-w-8 rounded-full px-2 py-1 text-center transition-colors ${
+              locale === "en" ? "bg-foreground text-background" : ""
+            }`}
+          >
+            EN
+          </span>
+          <span
+            className={`min-w-8 rounded-full px-2 py-1 text-center transition-colors ${
+              locale === "zh" ? "bg-foreground text-background" : ""
+            }`}
+          >
+            中
+          </span>
+        </button>
+
         <div className="grid lg:grid-cols-[320px_1fr] gap-8 lg:gap-16 items-center">
 
           {/* Left Side - Profile & Links */}
@@ -67,7 +99,7 @@ export default function WorkPage() {
                 <img
                   src={personalInfo.profileImage}
                   alt={personalInfo.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_12px_34px_rgba(0,0,0,0.10)]"
                 />
               </div>
             </Link>
@@ -112,10 +144,10 @@ export default function WorkPage() {
             </button>
           </div>
 
-          {/* Right Side - Chatbot (Main Feature) */}
+            {/* Right Side - Chatbot (Main Feature) */}
           <div className="w-full">
             <div className="border border-border/50 rounded-2xl bg-card/50 backdrop-blur-sm shadow-soft-lg overflow-hidden h-[500px] lg:h-[580px] flex flex-col transition-shadow duration-300 hover:shadow-soft">
-              <SidebarChat />
+              <SidebarChat locale={locale} />
             </div>
           </div>
 
