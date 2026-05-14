@@ -11,7 +11,7 @@ const name: Record<Locale, string> = {
 };
 
 const messageLinkClass =
-  "rounded-[4px] bg-[linear-gradient(180deg,transparent_54%,rgba(43,43,43,0.10)_54%)] font-semibold underline decoration-2 underline-offset-[0.18em] decoration-foreground/45 transition-colors hover:bg-[linear-gradient(180deg,transparent_42%,rgba(43,43,43,0.16)_42%)] hover:decoration-foreground";
+  "rounded-[4px] bg-[linear-gradient(180deg,transparent_54%,rgba(43,43,43,0.10)_54%)] underline decoration-2 underline-offset-[0.18em] decoration-foreground/45 transition-colors hover:bg-[linear-gradient(180deg,transparent_42%,rgba(43,43,43,0.16)_42%)] hover:decoration-foreground";
 
 const profileInfo = {
   tagline: "Build. Think. Compound.",
@@ -194,7 +194,7 @@ export function LandingHero() {
             {messages.map((message, index) => (
               <p
                 key={`${animationKey}-${index}`}
-                className="w-fit max-w-[min(84%,520px)] animate-[message-in_360ms_cubic-bezier(0.2,0.8,0.2,1)_both] rounded-[18px] rounded-tl-md border border-border bg-card px-3.5 py-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.032)] max-[1023px]:max-w-[92%] max-[420px]:max-w-[96%]"
+                className="w-fit max-w-[min(84%,520px)] animate-[message-in_360ms_cubic-bezier(0.2,0.8,0.2,1)_both] rounded-[18px] rounded-tl-md border border-border bg-card px-3.5 py-2.5 shadow-[0_4px_14px_rgba(0,0,0,0.018)] max-[1023px]:max-w-[92%] max-[420px]:max-w-[96%]"
                 style={{ animationDelay: `${80 + index * 70}ms` }}
               >
                 {message[locale]}
