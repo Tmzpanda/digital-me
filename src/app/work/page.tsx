@@ -91,7 +91,7 @@ export default function WorkPage() {
         <div className="grid lg:grid-cols-[320px_1fr] gap-8 lg:gap-16 items-center">
 
           {/* Left Side - Profile & Links */}
-          <div className="flex flex-col items-center text-center lg:items-center lg:text-center">
+          <div className="flex animate-[profile-in_680ms_cubic-bezier(0.2,0.8,0.2,1)_both] flex-col items-center text-center lg:items-center lg:text-center">
             {/* Profile Photo */}
             <Link href="/" className="relative mb-6 group">
               <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-border/50">
