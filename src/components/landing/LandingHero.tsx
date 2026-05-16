@@ -122,6 +122,26 @@ const messages: Array<Record<Locale, React.ReactNode>> = [
       </>
     ),
   },
+  {
+    en: (
+      <>
+        If any of this resonates, feel free to{" "}
+        <Link href="mailto:tmzpanda@gmail.com" className={messageLinkClass}>
+          reach out
+        </Link>
+        {" :)"}
+      </>
+    ),
+    zh: (
+      <>
+        如果你也对这些东西感兴趣，欢迎
+        <Link href="mailto:tmzpanda@gmail.com" className={messageLinkClass}>
+          来聊聊
+        </Link>
+        :)
+      </>
+    ),
+  },
 ];
 
 export function LandingHero() {
